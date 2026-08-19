@@ -103,3 +103,58 @@ class TestLobbyFlow(IntegrationTestCase):
 				lock_lobby(self.session)
 		finally:
 			frappe.set_user("Administrator")
+
+
+class TestHostDataIsolation(IntegrationTestCase):
+	def setUp(self):
+		frappe.set_user("Administrator")
+		self.other_host = make_quiz_host("other-host@quizzly.test")
+		quiz = frappe.get_doc(
+			{
+				"doctype": "QZ Quiz",
+				"title": "Isolation Quiz",
+				"questions": [
+					{
+						"question_text": "2 + 2?",
+						"option_1": "3",
+						"option_2": "4",
+						"option_3": "5",
+						"option_4": "6",
+						"correct_option": "2",
+					}
+				],
+			}
+		).insert()
+		created = create_session(quiz.name)
+		self.session = created["session"]
+		frappe.set_user("Guest")
+		try:
+			join_session(created["game_pin"], "Player")
+		finally:
+			frappe.set_user("Administrator")
+
+	def tearDown(self):
+		frappe.set_user("Administrator")
+		super().tearDown()
+
+	def test_host_cannot_list_other_hosts_participants(self):
+		frappe.set_user(self.other_host)
+		try:
+			visible = frappe.get_list("QZ Participant", pluck="name")
+			self.assertEqual(visible, [], "a host must not see another host's participants")
+			with self.assertRaises(frappe.PermissionError):
+				frappe.get_doc(
+					"QZ Participant",
+					frappe.db.get_value("QZ Participant", {"session": self.session}, "name"),
+				).check_permission("read")
+		finally:
+			frappe.set_user("Administrator")
+
+
+def make_quiz_host(email: str) -> str:
+	if not frappe.db.exists("User", email):
+		user = frappe.get_doc(
+			{"doctype": "User", "email": email, "first_name": "Host", "send_welcome_email": 0}
+		).insert(ignore_permissions=True)
+		user.add_roles("Quiz Host")
+	return email

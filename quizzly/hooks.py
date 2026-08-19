@@ -23,6 +23,18 @@ use_json_request_body = True
 
 fixtures = [{"dt": "Role", "filters": [["name", "in", ["Quiz Host"]]]}]
 
+# A host may only read the participants and answers of sessions they host.
+# query_conditions filters list views; has_permission guards a single document.
+permission_query_conditions = {
+	"QZ Participant": "quizzly.permissions.participant_query_conditions",
+	"QZ Answer": "quizzly.permissions.answer_query_conditions",
+}
+
+has_permission = {
+	"QZ Participant": "quizzly.permissions.owns_session_row",
+	"QZ Answer": "quizzly.permissions.owns_session_row",
+}
+
 website_route_rules = [
 	{"from_route": "/quizzly/<path:app_path>", "to_route": "quizzly"},
 ]
