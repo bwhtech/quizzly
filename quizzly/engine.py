@@ -14,6 +14,8 @@ from frappe.utils import now_datetime, time_diff_in_seconds
 
 GRACE_SECONDS = 1.0
 STATS_SECONDS = 5
+# a reveal you have to read needs longer than one you only glance at
+EXPLAIN_STATS_SECONDS = 12
 GETREADY_SECONDS = 3
 # ponytail: host gets 5 minutes to hit Next, then the game moves on by itself
 ADVANCE_WAIT_CAP = 300
@@ -195,14 +197,18 @@ def open_question(session_doc, question, index: int, total: int) -> None:
 def close_question(session_doc, question, index: int, total: int) -> None:
 	state = get_state(session_doc.name) or {}
 	window_ms = state.get("window_ms") or question_window(question, session_doc) * 1000
-	auto_advance = frappe.db.get_value("QZ Session", session_doc.name, "auto_advance")
+	options = frappe.db.get_value(
+		"QZ Session", session_doc.name, ["auto_advance", "show_explainer"], as_dict=True
+	)
+	explainer = explainer_payload(question, options.show_explainer)
+	stats_seconds = EXPLAIN_STATS_SECONDS if explainer else STATS_SECONDS
 	set_state(
 		session_doc.name,
 		{
 			**state,
 			"phase": "stats",
 			"status": "closed",
-			"next_ts": time.time() + (STATS_SECONDS if auto_advance else ADVANCE_WAIT_CAP),
+			"next_ts": time.time() + (stats_seconds if options.auto_advance else ADVANCE_WAIT_CAP),
 		},
 		ttl=ADVANCE_WAIT_CAP + STATE_TTL_MARGIN,
 	)
@@ -261,6 +267,7 @@ def close_question(session_doc, question, index: int, total: int) -> None:
 			"top_5": top_5,
 			"streaks": streaks,
 			"is_last": index == total - 1,
+			**explainer,
 		},
 	)
 	frappe.cache.delete_value(answered_key(session_doc.name, question.name))
@@ -413,6 +420,19 @@ def question_payload(session_doc, question, index: int, total: int, deadline_ts:
 		"window_ms": question_window(question, session_doc) * 1000,
 		"randomize_answer_order": int(session_doc.randomize_answer_order or 0),
 		"points_multiplier": int(question.points_multiplier or 1),
+	}
+
+
+def explainer_payload(question, show_explainer) -> dict:
+	"""Empty unless the session wants an explainer and the question carries one.
+
+	Kept out of every pre-close payload on purpose: an explanation gives the answer away.
+	"""
+	if not show_explainer or not (question.explanation or question.explanation_image):
+		return {}
+	return {
+		"explanation": question.explanation or None,
+		"explanation_image": question.explanation_image or None,
 	}
 
 

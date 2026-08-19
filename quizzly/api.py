@@ -13,6 +13,7 @@ from quizzly.engine import publish_session_event
 from quizzly.profanity import is_profane
 
 NICKNAME_MAX_LENGTH = 20
+SESSION_OPTIONS = ("auto_advance", "randomize_answer_order", "show_explainer")
 
 
 @frappe.whitelist()
@@ -74,6 +75,7 @@ def get_host_state(session: str | None = None) -> dict:
 		"game_pin": session_doc.game_pin,
 		"quiz_title": frappe.db.get_value("QZ Quiz", session_doc.quiz, "title"),
 		"auto_advance": session_doc.auto_advance,
+		"show_explainer": session_doc.show_explainer,
 		**get_lobby_state(session_doc),
 	}
 	if session_doc.status == "Lobby":
@@ -111,6 +113,7 @@ def get_host_state(session: str | None = None) -> dict:
 		for answer in answers:
 			distribution[str(answer.selected_option)] += 1
 		result["distribution"] = distribution
+		result.update(engine.explainer_payload(question, session_doc.show_explainer))
 	return result
 
 
@@ -130,10 +133,12 @@ def start_session(session: str) -> dict:
 
 
 @frappe.whitelist()
-def set_auto_advance(session: str, enabled: int) -> dict:
+def set_session_option(session: str, option: str, enabled: int) -> dict:
+	if option not in SESSION_OPTIONS:
+		frappe.throw(_("Unknown session option"))
 	session_doc = get_host_session(session)
-	session_doc.db_set("auto_advance", int(enabled))
-	return {"auto_advance": session_doc.auto_advance}
+	session_doc.db_set(option, int(enabled))
+	return {option: session_doc.get(option)}
 
 
 @frappe.whitelist()
@@ -307,6 +312,7 @@ def get_result(pin: str, token: str, question_row: str) -> dict:
 		"streak": participant.streak,
 		"rank": get_rank(session.name, participant),
 		"top_5": get_leaderboard(session.name)[:5],
+		**engine.explainer_payload(get_question_row(session, question_row), session.show_explainer),
 	}
 
 

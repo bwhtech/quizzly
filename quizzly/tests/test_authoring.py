@@ -76,3 +76,19 @@ class TestQuizAuthoring(IntegrationTestCase):
 
 		self.assertEqual(payloads[0]["image_url"], "/files/cat.png")
 		self.assertIsNone(payloads[1]["image_url"])
+
+	def test_explainer_survives_a_reorder(self):
+		explained = question("Why?", explanation="Because.", explanation_image="/files/why.png")
+		saved = save(quiz_doc([question("First"), explained]))
+
+		reordered = save(quiz_doc([explained, question("First")], base=saved))
+
+		rows = frappe.get_all(
+			"QZ Question",
+			filters={"parent": reordered["name"]},
+			fields=["question_text", "explanation", "explanation_image"],
+			order_by="idx asc",
+		)
+		self.assertEqual(rows[0].explanation, "Because.")
+		self.assertEqual(rows[0].explanation_image, "/files/why.png")
+		self.assertFalse(rows[1].explanation)

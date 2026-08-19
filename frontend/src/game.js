@@ -43,6 +43,12 @@ export const SHAPES = [
 	},
 ];
 
+// The server omits both keys when there is nothing to show, so absent means no card.
+export function readExplainer(payload) {
+	if (!payload?.explanation && !payload?.explanation_image) return null;
+	return { text: payload.explanation, image: payload.explanation_image };
+}
+
 export function shapeFor(optionId) {
 	return SHAPES[Number(optionId) - 1];
 }

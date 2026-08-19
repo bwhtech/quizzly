@@ -9,6 +9,7 @@ from quizzly.api import (
 	get_result,
 	get_state,
 	join_session,
+	set_session_option,
 	submit_answer,
 )
 from quizzly.profanity import is_profane
@@ -82,6 +83,55 @@ class TestPlayerResult(GameTestCase):
 		state = get_state(self.pin, self.alice["participant_token"])
 		self.assertEqual(state["status"], "Ended")
 		self.assertEqual(len(state["leaderboard"]), 2)
+
+
+class TestExplainerOnReconnect(GameTestCase):
+	def setUp(self):
+		super().setUp()
+		self.activate()
+		quiz = frappe.get_doc("QZ Quiz", self.quiz.name)
+		quiz.questions[0].explanation = "Because 2 + 2 = 4."
+		quiz.questions[0].explanation_image = "/files/why.png"
+		quiz.save()
+		self.questions = quiz.questions
+		self.question = self.open_question(window=30)
+		submit_answer(self.pin, self.alice["participant_token"], self.question.name, "2")
+		engine.close_question(self.session_doc, self.questions[0], 0, len(self.questions))
+
+	def test_host_reload_mid_reveal_keeps_the_explainer(self):
+		state = get_host_state(self.session)
+		self.assertEqual(state["phase"], "closed")
+		self.assertEqual(state["explanation"], "Because 2 + 2 = 4.")
+		self.assertEqual(state["explanation_image"], "/files/why.png")
+
+	def test_player_result_carries_the_explainer(self):
+		result = get_result(self.pin, self.alice["participant_token"], self.question.name)
+		self.assertEqual(result["explanation"], "Because 2 + 2 = 4.")
+		self.assertEqual(result["explanation_image"], "/files/why.png")
+
+	def test_toggle_off_hides_it_from_both_reconnect_paths(self):
+		set_session_option(self.session, "show_explainer", 0)
+		self.assertNotIn("explanation", get_host_state(self.session))
+		self.assertNotIn(
+			"explanation", get_result(self.pin, self.alice["participant_token"], self.question.name)
+		)
+
+
+class TestSessionOptions(GameTestCase):
+	def test_each_option_is_writable(self):
+		for option in ("auto_advance", "randomize_answer_order", "show_explainer"):
+			self.assertEqual(set_session_option(self.session, option, 0), {option: 0})
+			self.assertEqual(frappe.db.get_value("QZ Session", self.session, option), 0)
+
+	def test_unknown_option_is_refused(self):
+		with self.assertRaises(frappe.ValidationError):
+			set_session_option(self.session, "status", 0)
+		self.assertEqual(frappe.db.get_value("QZ Session", self.session, "status"), "Lobby")
+
+	def test_non_host_is_refused(self):
+		frappe.set_user("Guest")
+		with self.assertRaises(frappe.PermissionError):
+			set_session_option(self.session, "show_explainer", 0)
 
 
 class TestAbandonedSession(GameTestCase):

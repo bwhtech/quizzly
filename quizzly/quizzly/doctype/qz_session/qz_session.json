@@ -12,6 +12,7 @@
   "lobby_locked",
   "auto_advance",
   "randomize_answer_order",
+  "show_explainer",
   "current_question",
   "started_at",
   "ended_at"
@@ -66,6 +67,12 @@
    "fieldname": "randomize_answer_order",
    "fieldtype": "Check",
    "label": "Randomize Answer Order"
+  },
+  {
+   "default": "1",
+   "fieldname": "show_explainer",
+   "fieldtype": "Check",
+   "label": "Show Explainer"
   },
   {
    "default": "-1",

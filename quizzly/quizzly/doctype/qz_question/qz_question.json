@@ -7,6 +7,8 @@
  "field_order": [
   "question_text",
   "image",
+  "explanation",
+  "explanation_image",
   "option_1",
   "option_2",
   "option_3",
@@ -27,6 +29,17 @@
    "fieldname": "image",
    "fieldtype": "Attach Image",
    "label": "Image"
+  },
+  {
+   "description": "Shown on the reveal screen after this question closes.",
+   "fieldname": "explanation",
+   "fieldtype": "Small Text",
+   "label": "Explanation"
+  },
+  {
+   "fieldname": "explanation_image",
+   "fieldtype": "Attach Image",
+   "label": "Explanation Image"
   },
   {
    "fieldname": "option_1",

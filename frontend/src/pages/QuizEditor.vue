@@ -125,6 +125,46 @@
 					</label>
 				</div>
 
+				<textarea
+					v-model="question.explanation"
+					rows="2"
+					class="field"
+					placeholder="Why is this the answer? Shown after the question closes (optional)"
+				/>
+
+				<div class="flex flex-wrap items-center gap-4">
+					<img
+						v-if="question.explanation_image"
+						:src="question.explanation_image"
+						alt=""
+						class="h-24 rounded-xl object-contain"
+					/>
+					<FileUploader
+						file-types="image/*"
+						:upload-args="{ private: 0, optimize: true }"
+						@success="(file) => (question.explanation_image = file.file_url)"
+					>
+						<template #default="{ openFileSelector, uploading, progress }">
+							<button class="ctl" @click="openFileSelector">
+								{{
+									uploading
+										? `Uploading ${progress}%`
+										: question.explanation_image
+										? "Replace explainer image"
+										: "Add explainer image"
+								}}
+							</button>
+						</template>
+					</FileUploader>
+					<button
+						v-if="question.explanation_image"
+						class="ctl"
+						@click="question.explanation_image = null"
+					>
+						Remove explainer image
+					</button>
+				</div>
+
 				<div class="flex flex-wrap gap-4">
 					<label
 						class="flex items-center gap-2 whitespace-nowrap font-mono text-xs text-paper/50"
@@ -170,6 +210,8 @@ import HostBar from "@/components/HostBar.vue";
 const QUESTION_FIELDS = [
 	"question_text",
 	"image",
+	"explanation",
+	"explanation_image",
 	"option_1",
 	"option_2",
 	"option_3",
@@ -229,6 +271,8 @@ function blankQuestion() {
 	return {
 		question_text: "",
 		image: null,
+		explanation: "",
+		explanation_image: null,
 		option_1: "",
 		option_2: "",
 		option_3: "",

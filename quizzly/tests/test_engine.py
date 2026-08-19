@@ -369,3 +369,70 @@ class TestGameLoop(GameTestCase):
 	def test_end_session_from_lobby_cancels(self):
 		end_session(self.session)
 		self.assertEqual(frappe.db.get_value("QZ Session", self.session, "status"), "Cancelled")
+
+
+class TestExplainer(GameTestCase):
+	def set_explainer(self, index=0, text="Because 2 + 2 = 4.", image="/files/why.png"):
+		quiz = frappe.get_doc("QZ Quiz", self.quiz.name)
+		quiz.questions[index].explanation = text
+		quiz.questions[index].explanation_image = image
+		quiz.save()
+		self.questions = quiz.questions
+		return quiz.questions[index]
+
+	def close_question(self, index=0):
+		question = frappe.get_doc("QZ Quiz", self.quiz.name).questions[index]
+		self.open_question(index)
+		events = []
+		with (
+			patch("frappe.publish_realtime", side_effect=lambda **kw: events.append(kw.get("message"))),
+			patch("frappe.db.commit"),
+		):
+			engine.close_question(self.session_doc, question, index, len(self.questions))
+		return next(e for e in events if isinstance(e, dict) and e.get("type") == "question_closed")
+
+	def test_question_closed_carries_the_explainer(self):
+		self.activate()
+		self.set_explainer()
+		closed = self.close_question()
+		self.assertEqual(closed["explanation"], "Because 2 + 2 = 4.")
+		self.assertEqual(closed["explanation_image"], "/files/why.png")
+
+	def test_question_without_an_explainer_carries_neither_key(self):
+		self.activate()
+		closed = self.close_question()
+		self.assertNotIn("explanation", closed)
+		self.assertNotIn("explanation_image", closed)
+
+	def test_toggle_off_drops_the_explainer(self):
+		self.activate()
+		self.set_explainer()
+		frappe.db.set_value("QZ Session", self.session, "show_explainer", 0)
+		closed = self.close_question()
+		self.assertNotIn("explanation", closed)
+		self.assertNotIn("explanation_image", closed)
+
+	def test_open_question_payload_never_leaks_the_explainer(self):
+		question = self.set_explainer()
+		payload = engine.question_payload(self.session_doc, question, 0, 2, time.time() + 20)
+		self.assertNotIn("Because", json.dumps(payload))
+		self.assertNotIn("why.png", json.dumps(payload))
+
+	def test_auto_advance_holds_longer_for_an_explainer(self):
+		self.activate()
+		self.set_explainer()
+		self.close_question()
+		with_explainer = engine.get_state(self.session)["next_ts"] - time.time()
+		self.assertGreater(with_explainer, engine.STATS_SECONDS + 1)
+		self.assertLessEqual(with_explainer, engine.EXPLAIN_STATS_SECONDS)
+
+		self.close_question(index=1)
+		without = engine.get_state(self.session)["next_ts"] - time.time()
+		self.assertLessEqual(without, engine.STATS_SECONDS)
+
+	def test_toggle_off_keeps_the_short_hold(self):
+		self.activate()
+		self.set_explainer()
+		frappe.db.set_value("QZ Session", self.session, "show_explainer", 0)
+		self.close_question()
+		self.assertLessEqual(engine.get_state(self.session)["next_ts"] - time.time(), engine.STATS_SECONDS)

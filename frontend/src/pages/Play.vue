@@ -156,6 +156,20 @@
 				<p class="font-mono text-xs uppercase tracking-[0.2em] text-paper/40">
 					Rank {{ result.rank }} · {{ result.score }} pts
 				</p>
+				<div
+					v-if="explainer"
+					class="mt-2 flex w-full max-w-xs flex-col gap-3 rounded-2xl border border-haze bg-dusk p-4 text-left"
+				>
+					<img
+						v-if="explainer.image"
+						:src="explainer.image"
+						alt=""
+						class="max-h-40 w-full rounded-xl object-contain"
+					/>
+					<p v-if="explainer.text" class="whitespace-pre-line text-sm text-paper/75">
+						{{ explainer.text }}
+					</p>
+				</div>
 				<ul class="mt-2 w-full max-w-xs text-left">
 					<li
 						v-for="(entry, index) in result.top_5"
@@ -227,7 +241,7 @@ import { computed, inject, onMounted, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import { call } from "@/api";
 import { clearPlayer, loadPlayer } from "@/player";
-import { optionOrder, shapeFor, useCountdown, useSessionRoom } from "@/game";
+import { optionOrder, readExplainer, shapeFor, useCountdown, useSessionRoom } from "@/game";
 import AvatarPic from "@/components/AvatarPic.vue";
 import DrainRing from "@/components/DrainRing.vue";
 import ThemeButton from "@/components/ThemeButton.vue";
@@ -257,6 +271,7 @@ const result = ref({});
 const leaderboard = ref([]);
 const myRank = ref(0);
 const error = ref("");
+const explainer = computed(() => readExplainer(result.value));
 
 watch(
 	() => Math.ceil(remaining.value),

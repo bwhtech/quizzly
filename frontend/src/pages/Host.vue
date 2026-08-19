@@ -322,6 +322,24 @@
 						</div>
 					</div>
 
+					<div
+						v-if="phase === 'closed' && explainer"
+						class="flex flex-col gap-4 rounded-2xl border border-haze bg-dusk p-4 sm:flex-row sm:items-center sm:gap-6 sm:p-6"
+					>
+						<img
+							v-if="explainer.image"
+							:src="explainer.image"
+							alt=""
+							class="max-h-[22vh] w-full object-contain sm:max-h-[30vh] sm:w-2/5"
+						/>
+						<p
+							v-if="explainer.text"
+							class="flex-1 whitespace-pre-line text-lg leading-snug text-paper/80 sm:text-2xl"
+						>
+							{{ explainer.text }}
+						</p>
+					</div>
+
 					<template v-if="phase === 'closed'">
 						<div class="flex h-32 w-full items-stretch gap-3">
 							<div
@@ -392,8 +410,19 @@
 						<button v-if="phase === 'closed'" class="ctl ctl-go" @click="next">
 							Next question
 						</button>
-						<button class="ctl" :data-on="autoAdvance" @click="toggleAutoAdvance">
+						<button
+							class="ctl"
+							:data-on="autoAdvance"
+							@click="toggleOption('auto_advance', autoAdvance)"
+						>
 							Auto-advance {{ autoAdvance ? "on" : "off" }}
+						</button>
+						<button
+							class="ctl"
+							:data-on="showExplainer"
+							@click="toggleOption('show_explainer', showExplainer)"
+						>
+							Explainer {{ showExplainer ? "on" : "off" }}
 						</button>
 						<button class="ctl" @click="end">End game</button>
 						<p v-if="error" class="text-alert">{{ error }}</p>
@@ -409,7 +438,7 @@ import { computed, inject, onMounted, ref, watch } from "vue";
 import QRCode from "qrcode";
 import { call, readError } from "@/api";
 import { confirm } from "@/confirm";
-import { SHAPES, useCountdown, useSessionRoom } from "@/game";
+import { SHAPES, readExplainer, useCountdown, useSessionRoom } from "@/game";
 import AvatarPic from "@/components/AvatarPic.vue";
 import ThemeButton from "@/components/ThemeButton.vue";
 import DrainRing from "@/components/DrainRing.vue";
@@ -435,6 +464,8 @@ const phase = ref("lobby");
 const participants = ref([]);
 const lobbyLocked = ref(false);
 const autoAdvance = ref(false);
+const showExplainer = ref(true);
+const explainer = ref(null);
 const question = ref(null);
 const answerCount = ref(0);
 const distribution = ref({});
@@ -510,6 +541,7 @@ function onSessionEvent(message) {
 		correctOption.value = message.correct_option;
 		top5.value = message.top_5;
 		streaks.value = message.streaks;
+		explainer.value = readExplainer(message);
 		phase.value = "closed";
 	} else if (message.type === "podium") {
 		stopCountdown();
@@ -561,6 +593,7 @@ async function applyState(state) {
 	participants.value = state.participants || [];
 	lobbyLocked.value = Boolean(state.lobby_locked);
 	autoAdvance.value = Boolean(state.auto_advance);
+	showExplainer.value = Boolean(state.show_explainer);
 	top5.value = state.top_5 || [];
 	qrDataUrl.value = await renderQr(joinUrl.value);
 
@@ -580,6 +613,7 @@ async function applyState(state) {
 		question.value = state.question;
 		distribution.value = state.distribution || {};
 		correctOption.value = state.question.correct_option;
+		explainer.value = readExplainer(state);
 		phase.value = "closed";
 	} else {
 		phase.value = "get_ready";
@@ -650,11 +684,12 @@ async function toggleLock() {
 	if (lobby) lobbyLocked.value = Boolean(lobby.lobby_locked);
 }
 
-async function toggleAutoAdvance() {
-	const result = await hostCall("quizzly.api.set_auto_advance", {
-		enabled: autoAdvance.value ? 0 : 1,
+async function toggleOption(option, current) {
+	const result = await hostCall("quizzly.api.set_session_option", {
+		option,
+		enabled: current.value ? 0 : 1,
 	});
-	if (result) autoAdvance.value = Boolean(result.auto_advance);
+	if (result) current.value = Boolean(result[option]);
 }
 
 async function kick(participant) {
