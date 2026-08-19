@@ -62,7 +62,14 @@ Both honour `show_explainer` the same way, so a reload cannot resurrect an expla
 
 ## Screens
 
-**Host (`Host.vue`, `phase === 'closed'`)** — explainer card between the answer options and the distribution bars, so the eye goes correct answer → why → how everyone did. Image capped like the question image (`max-h-[22vh]` / `sm:max-h-[40vh]`) so a tall portrait upload cannot push the leaderboard off screen. Card is skipped entirely when both fields are empty, which is the common case and must not leave a gap.
+**Host (`Host.vue`, `phase === 'closed'`)** — the reveal is a projected screen nobody can scroll, and it was already full: question, options, bars, leaderboard, controls. A sixth stacked band pushes the controls below the fold, so the explainer takes the spare **width** instead. Below the options the reveal splits into two columns: explainer card on the left, distribution bars and leaderboard on the right. With no explainer the stats column is alone and the reveal looks exactly as it does today.
+
+Two more height rules keep it inside the viewport:
+
+- The explainer image is capped in `vh`, and the card stacks image over text since it now owns half the width.
+- On the reveal, a question that has its own image drops it when the explainer has one. The question picture had the whole timer to be looked at; two pictures at once is what breaks the fold.
+
+Verified at 1280x720, 1366x768, 1920x1080 with a question carrying both images: `scrollHeight === innerHeight`.
 
 **Player (`Play.vue`, `phase === 'result'`)** — same content under the rank/score line, above the top-5 list. Text at reading size, image constrained to the card width. This is the screen a player actually studies, so the explainer matters more here than on the TV.
 

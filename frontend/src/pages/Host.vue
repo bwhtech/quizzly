@@ -300,11 +300,18 @@
 						</p>
 					</div>
 
+					<!-- the question picture had the whole timer to be looked at; on the reveal it
+					     yields to the explainer picture rather than pushing the screen past a scroll -->
 					<img
-						v-if="question?.image_url"
+						v-if="question?.image_url && !(phase === 'closed' && explainer?.image)"
 						:src="question.image_url"
 						alt=""
-						class="max-h-[22vh] w-full object-contain sm:max-h-[40vh]"
+						:class="
+							phase === 'closed'
+								? 'max-h-[14vh] sm:max-h-[20vh]'
+								: 'max-h-[22vh] sm:max-h-[40vh]'
+						"
+						class="w-full object-contain"
 					/>
 
 					<div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -333,88 +340,99 @@
 						</div>
 					</div>
 
+					<!-- the reveal is a big screen nobody can scroll: the explainer takes the
+					     spare width beside the stats rather than another band of height -->
 					<div
-						v-if="phase === 'closed' && explainer"
-						class="flex flex-col gap-4 rounded-2xl border border-haze bg-dusk p-4 sm:flex-row sm:items-center sm:gap-6 sm:p-6"
+						v-if="phase === 'closed'"
+						class="flex flex-col gap-5 sm:flex-row sm:gap-7"
 					>
-						<img
-							v-if="explainer.image"
-							:src="explainer.image"
-							alt=""
-							class="max-h-[22vh] w-full object-contain sm:max-h-[30vh] sm:w-2/5"
-						/>
-						<p
-							v-if="explainer.text"
-							class="flex-1 whitespace-pre-line text-lg leading-snug text-paper/80 sm:text-2xl"
+						<div
+							v-if="explainer"
+							class="flex flex-1 flex-col gap-3 rounded-2xl border border-haze bg-dusk p-4 sm:p-5"
 						>
-							{{ explainer.text }}
-						</p>
-					</div>
-
-					<template v-if="phase === 'closed'">
-						<div class="flex h-32 w-full items-stretch gap-3">
-							<div
-								v-for="shape in visibleShapes"
-								:key="shape.id"
-								class="flex flex-1 flex-col gap-1.5"
+							<img
+								v-if="explainer.image"
+								:src="explainer.image"
+								alt=""
+								class="max-h-[18vh] w-full object-contain sm:max-h-[26vh]"
+							/>
+							<p
+								v-if="explainer.text"
+								class="whitespace-pre-line text-lg leading-snug text-paper/80 sm:text-xl"
 							>
-								<span
-									class="text-center font-mono text-sm tabular-nums text-paper/60"
-								>
-									{{ distribution[shape.id] || 0 }}
-								</span>
-								<div class="flex flex-1 flex-col justify-end rounded-t-lg bg-dusk">
-									<div
-										class="rounded-t-lg transition-[height] duration-500"
-										:class="shape.fill"
-										:style="{ height: `${barHeight(shape.id)}%` }"
-									/>
-								</div>
-							</div>
+								{{ explainer.text }}
+							</p>
 						</div>
 
-						<div class="flex flex-wrap items-start justify-between gap-6 sm:gap-8">
-							<ol class="w-full flex-1 sm:min-w-64">
-								<li
-									v-for="(entry, index) in top5"
-									:key="entry.nickname"
-									class="flex items-center justify-between gap-3 border-b border-haze py-2 text-base text-paper/70 sm:text-lg"
+						<div class="flex flex-1 flex-col gap-5 sm:gap-7">
+							<div class="flex h-32 w-full items-stretch gap-3">
+								<div
+									v-for="shape in visibleShapes"
+									:key="shape.id"
+									class="flex flex-1 flex-col gap-1.5"
 								>
-									<span class="flex min-w-0 items-center gap-3">
-										<span
-											class="w-5 shrink-0 font-mono text-xs tabular-nums text-paper/35"
-										>
-											{{ index + 1 }}
+									<span
+										class="text-center font-mono text-sm tabular-nums text-paper/60"
+									>
+										{{ distribution[shape.id] || 0 }}
+									</span>
+									<div
+										class="flex flex-1 flex-col justify-end rounded-t-lg bg-dusk"
+									>
+										<div
+											class="rounded-t-lg transition-[height] duration-500"
+											:class="shape.fill"
+											:style="{ height: `${barHeight(shape.id)}%` }"
+										/>
+									</div>
+								</div>
+							</div>
+
+							<div class="flex flex-wrap items-start justify-between gap-6 sm:gap-8">
+								<ol class="w-full flex-1 sm:min-w-64">
+									<li
+										v-for="(entry, index) in top5"
+										:key="entry.nickname"
+										class="flex items-center justify-between gap-3 border-b border-haze py-2 text-base text-paper/70 sm:text-lg"
+									>
+										<span class="flex min-w-0 items-center gap-3">
+											<span
+												class="w-5 shrink-0 font-mono text-xs tabular-nums text-paper/35"
+											>
+												{{ index + 1 }}
+											</span>
+											<AvatarPic
+												:id="entry.avatar"
+												:nickname="entry.nickname"
+												:size="28"
+											/>
+											<span class="truncate">{{ entry.nickname }}</span>
 										</span>
+										<span class="shrink-0 font-mono tabular-nums">{{
+											entry.score
+										}}</span>
+									</li>
+								</ol>
+								<ul
+									class="w-full flex-1 space-y-2 text-base text-paper/70 sm:text-lg"
+								>
+									<li
+										v-for="entry in streaks"
+										:key="entry.nickname"
+										class="flex items-center gap-2"
+									>
 										<AvatarPic
 											:id="entry.avatar"
 											:nickname="entry.nickname"
 											:size="28"
 										/>
-										<span class="truncate">{{ entry.nickname }}</span>
-									</span>
-									<span class="shrink-0 font-mono tabular-nums">{{
-										entry.score
-									}}</span>
-								</li>
-							</ol>
-							<ul class="w-full flex-1 space-y-2 text-base text-paper/70 sm:text-lg">
-								<li
-									v-for="entry in streaks"
-									:key="entry.nickname"
-									class="flex items-center gap-2"
-								>
-									<AvatarPic
-										:id="entry.avatar"
-										:nickname="entry.nickname"
-										:size="28"
-									/>
-									🔥 {{ entry.nickname }} is on a {{ entry.streak }} answer
-									streak
-								</li>
-							</ul>
+										🔥 {{ entry.nickname }} is on a {{ entry.streak }} answer
+										streak
+									</li>
+								</ul>
+							</div>
 						</div>
-					</template>
+					</div>
 
 					<div class="flex flex-wrap items-center gap-3">
 						<button v-if="phase === 'question'" class="ctl" @click="skip">Skip</button>
@@ -543,6 +561,7 @@ function onSessionEvent(message) {
 		question.value = message;
 		answerCount.value = 0;
 		correctOption.value = null;
+		explainer.value = null;
 		phase.value = "question";
 		startCountdown(message.window_ms / 1000);
 	} else if (message.type === "answer_count") {

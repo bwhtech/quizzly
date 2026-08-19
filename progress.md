@@ -45,6 +45,12 @@ contains neither the explanation text nor the image path.
   name, and the handler takes only the option name.
 - The explainer toggle sits in both the lobby control row and the in-game row, so
   a host can set it before starting or flip it mid-game.
+- First cut stacked the explainer card above the distribution bars and pushed the
+  host controls below the fold on a 1080p screen, which is unusable on a
+  projector. The reveal now splits into two columns below the options (explainer
+  left, stats right), the explainer image is capped in `vh`, and a question image
+  yields to the explainer image on the reveal. Checked at 1280x720, 1366x768 and
+  1920x1080 with a question carrying both images: no page scroll.
 
 ## Live Quiz Rework Phase 4: Trim Submit + Throttle answer_count (2026-07-23)
 
