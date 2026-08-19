@@ -139,8 +139,19 @@
 					<button class="ctl" :data-on="lobbyLocked" @click="toggleLock">
 						{{ lobbyLocked ? "Lobby locked" : "Lock lobby" }}
 					</button>
-					<button class="ctl" :data-on="autoAdvance" @click="toggleAutoAdvance">
-						Auto-advance {{ autoAdvance ? "on" : "off" }}
+					<button
+						class="ctl"
+						:data-on="options.auto_advance"
+						@click="toggleOption('auto_advance')"
+					>
+						Auto-advance {{ options.auto_advance ? "on" : "off" }}
+					</button>
+					<button
+						class="ctl"
+						:data-on="options.show_explainer"
+						@click="toggleOption('show_explainer')"
+					>
+						Explainer {{ options.show_explainer ? "on" : "off" }}
 					</button>
 					<button class="ctl" @click="toggleMute">
 						{{ muted ? "Sound off" : "Sound on" }}
@@ -412,17 +423,17 @@
 						</button>
 						<button
 							class="ctl"
-							:data-on="autoAdvance"
-							@click="toggleOption('auto_advance', autoAdvance)"
+							:data-on="options.auto_advance"
+							@click="toggleOption('auto_advance')"
 						>
-							Auto-advance {{ autoAdvance ? "on" : "off" }}
+							Auto-advance {{ options.auto_advance ? "on" : "off" }}
 						</button>
 						<button
 							class="ctl"
-							:data-on="showExplainer"
-							@click="toggleOption('show_explainer', showExplainer)"
+							:data-on="options.show_explainer"
+							@click="toggleOption('show_explainer')"
 						>
-							Explainer {{ showExplainer ? "on" : "off" }}
+							Explainer {{ options.show_explainer ? "on" : "off" }}
 						</button>
 						<button class="ctl" @click="end">End game</button>
 						<p v-if="error" class="text-alert">{{ error }}</p>
@@ -463,8 +474,9 @@ const session = ref(null);
 const phase = ref("lobby");
 const participants = ref([]);
 const lobbyLocked = ref(false);
-const autoAdvance = ref(false);
-const showExplainer = ref(true);
+// one object, not a ref each: the template unwraps a bare ref, so a toggle handler
+// can only be handed the option name, never the ref itself
+const options = ref({ auto_advance: false, show_explainer: true });
 const explainer = ref(null);
 const question = ref(null);
 const answerCount = ref(0);
@@ -592,8 +604,8 @@ async function applyState(state) {
 	localStorage.setItem(HOSTED_SESSION_KEY, state.session);
 	participants.value = state.participants || [];
 	lobbyLocked.value = Boolean(state.lobby_locked);
-	autoAdvance.value = Boolean(state.auto_advance);
-	showExplainer.value = Boolean(state.show_explainer);
+	options.value.auto_advance = Boolean(state.auto_advance);
+	options.value.show_explainer = Boolean(state.show_explainer);
 	top5.value = state.top_5 || [];
 	qrDataUrl.value = await renderQr(joinUrl.value);
 
@@ -684,12 +696,12 @@ async function toggleLock() {
 	if (lobby) lobbyLocked.value = Boolean(lobby.lobby_locked);
 }
 
-async function toggleOption(option, current) {
+async function toggleOption(option) {
 	const result = await hostCall("quizzly.api.set_session_option", {
 		option,
-		enabled: current.value ? 0 : 1,
+		enabled: options.value[option] ? 0 : 1,
 	});
-	if (result) current.value = Boolean(result[option]);
+	if (result) options.value[option] = Boolean(result[option]);
 }
 
 async function kick(participant) {

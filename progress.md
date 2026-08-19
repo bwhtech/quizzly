@@ -1,5 +1,51 @@
 # Progress
 
+## Phase 10: Answer Explainer (2026-08-19)
+
+Spec: `specs/phase-10-answer-explainer.md`. Optional explanation text + image per
+question, shown on the reveal after the question closes, gated by a session toggle.
+
+### Done
+
+- `QZ Question` gains `explanation` (Small Text) and `explanation_image` (Attach
+  Image). `QZ Session` gains `show_explainer` (Check, default 1).
+- `engine.explainer_payload` is the single gate: empty dict unless the session
+  wants an explainer and the question carries one. Rides `question_closed`,
+  `get_host_state` (closed branch), and `get_result`. Never touches
+  `question_payload`, so no pre-close payload can leak the answer.
+- Auto-advance holds the reveal for `EXPLAIN_STATS_SECONDS` (12s) instead of
+  `STATS_SECONDS` (5s), but only when an explainer is actually going to show.
+- `set_auto_advance` replaced by `set_session_option(session, option, enabled)`
+  with a `SESSION_OPTIONS` allowlist; the three session toggles share it.
+- Host reveal renders an explainer card between the options and the distribution
+  bars; player result renders it under the rank line. Editor gets a textarea and
+  an image uploader per question, both added to `QUESTION_FIELDS`.
+- Tests: 6 in `test_engine.py` (payload carried/omitted, toggle off, no leak in
+  the open-question payload, both hold lengths), 6 in `test_game_ux.py` (both
+  reconnect paths, option allowlist, host-only), 1 in `test_authoring.py`
+  (explainer survives a reorder). Full suite green.
+
+### Exit criteria verified
+
+Played in a real browser on quizzly.localhost, host screen + player device:
+quiz authored in the SPA editor with explainer text and an uploaded image, both
+render on the reveal, a question without one shows the reveal unchanged with no
+gap, both host and player reload mid-reveal and keep the card, and with the
+toggle off the card is gone and `get_host_state` carries no explainer keys at
+all. Checked on the wire during an open question: the guest `get_state` response
+contains neither the explanation text nor the image path.
+
+### Notes
+
+- Two bugs the browser caught that the Python tests could not: the lobby's
+  Auto-advance button still called the deleted `toggleAutoAdvance`, and passing a
+  ref into `toggleOption(option, current)` from the template broke because Vue
+  unwraps refs there, so `current.value` was always undefined and every toggle
+  sent `enabled: 1`. Host toggles now live in one `options` object keyed by field
+  name, and the handler takes only the option name.
+- The explainer toggle sits in both the lobby control row and the in-game row, so
+  a host can set it before starting or flip it mid-game.
+
 ## Live Quiz Rework Phase 4: Trim Submit + Throttle answer_count (2026-07-23)
 
 Spec: `specs/live-quiz-rework/phase-4-submit-and-count.md`. Cut the last two

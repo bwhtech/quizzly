@@ -66,7 +66,7 @@ Both honour `show_explainer` the same way, so a reload cannot resurrect an expla
 
 **Player (`Play.vue`, `phase === 'result'`)** — same content under the rank/score line, above the top-5 list. Text at reading size, image constrained to the card width. This is the screen a player actually studies, so the explainer matters more here than on the TV.
 
-**Editor (`QuizEditor.vue`)** — per question, below the existing image row: an `explanation` textarea (placeholder "Why is this the answer? (optional)") and an explainer image uploader reusing the current `FileUploader` block. Both new fields go into `QUESTION_FIELDS`, otherwise `save()` silently drops them.
+**Editor (`QuizEditor.vue`)** — per question, below the answer options so the row reads question, picture, answers, why: an `explanation` textarea (placeholder "Why is this the answer? (optional)") and an explainer image uploader reusing the current `FileUploader` block. Both new fields go into `QUESTION_FIELDS`, otherwise `save()` silently drops them.
 
 ## Host control
 
