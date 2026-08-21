@@ -96,6 +96,13 @@ class GameTestCase(IntegrationTestCase):
 		frappe.db.set_value("QZ Session", self.session, "status", "Active")
 		self.session_doc.reload()
 
+	def record_events(self, events):
+		def record(event=None, message=None, room=None, **kwargs):
+			if isinstance(message, dict) and "type" in message:
+				events.append(message)
+
+		return record
+
 	def open_question(self, index=0, window=30):
 		question = self.questions[index]
 		now = time.time()
@@ -238,6 +245,7 @@ class TestGameLoop(GameTestCase):
 				"get_ready",
 				"question",
 				"question_closed",
+				"scoreboard",
 				"get_ready",
 				"question",
 				"question_closed",
@@ -251,7 +259,10 @@ class TestGameLoop(GameTestCase):
 		first_closed = next(e for e in events if e["type"] == "question_closed")
 		self.assertEqual(first_closed["correct_option"], "2")
 		self.assertEqual(first_closed["distribution"], {"1": 0, "2": 1, "3": 1, "4": 0})
-		self.assertEqual(first_closed["top_5"][0]["nickname"], "alice")
+
+		scoreboard = next(e for e in events if e["type"] == "scoreboard")
+		self.assertEqual([s["nickname"] for s in scoreboard["standings"]], ["alice", "bob"])
+		self.assertGreater(scoreboard["standings"][0]["gained"], 0)
 
 		podium = events[-1]
 		self.assertEqual(podium["type"], "podium")
@@ -304,6 +315,37 @@ class TestGameLoop(GameTestCase):
 			self.assertGreater(state["next_ts"] - time.time(), engine.STATS_SECONDS + 10)
 			engine.advance_session(self.session_doc, state, None)
 		self.assertEqual(engine.get_state(self.session)["phase"], "stats")
+
+	def test_stats_hands_over_to_the_standings_screen(self):
+		self.activate()
+		question = self.open_question(window=30)
+		submit_answer(self.pin, self.bob["participant_token"], question.name, "2")
+		events = []
+
+		with patch("frappe.publish_realtime", side_effect=self.record_events(events)):
+			with patch("frappe.db.commit"):
+				engine.close_question(self.session_doc, question, 0, len(self.questions))
+				engine.advance_session(self.session_doc, engine.get_state(self.session), "advance")
+
+		self.assertEqual(engine.get_state(self.session)["phase"], "scoreboard")
+		self.assertEqual([e["type"] for e in events], ["question_closed", "scoreboard"])
+		standings = events[1]["standings"]
+		# bob answered his way past alice, so the screen has both places to move between
+		self.assertEqual([s["nickname"] for s in standings], ["bob", "alice"])
+		self.assertEqual([s["rank"] for s in standings], [1, 2])
+		self.assertEqual([s["previous_rank"] for s in standings], [2, 1])
+		self.assertEqual(standings[0]["gained"], standings[0]["score"])
+		self.assertEqual(standings[1]["gained"], 0)
+
+	def test_last_question_skips_the_standings_for_the_podium(self):
+		self.activate()
+		frappe.db.set_value("QZ Session", self.session, "auto_advance", 0)
+		last = len(self.questions) - 1
+		question = self.open_question(index=last)
+		with patch("frappe.publish_realtime"), patch("frappe.db.commit"):
+			engine.close_question(self.session_doc, question, last, len(self.questions))
+			engine.advance_session(self.session_doc, engine.get_state(self.session), "advance")
+		self.assertEqual(frappe.db.get_value("QZ Session", self.session, "status"), "Ended")
 
 	def test_advance_control_on_last_question_finishes(self):
 		self.activate()
@@ -380,13 +422,6 @@ class TestExplanationScreen(GameTestCase):
 		quiz.save()
 		self.questions = frappe.get_doc("QZ Quiz", self.quiz.name).questions
 
-	def record_events(self, events):
-		def record(event=None, message=None, room=None, **kwargs):
-			if isinstance(message, dict) and "type" in message:
-				events.append(message)
-
-		return record
-
 	def test_explanation_holds_the_scoreboard_back(self):
 		self.activate()
 		self.enable_explanation()
@@ -437,10 +472,16 @@ class TestExplanationScreen(GameTestCase):
 				state = engine.get_state(self.session)
 				self.assertEqual(state["phase"], "explanation")
 				self.assertFalse(state["explanation"]["before_stats"])
-				# nothing is owed to the room after it, so the next step is the next question
+				# nothing is owed to the room after it, so the standings close the question
+				engine.advance_session(self.session_doc, state, "advance")
+				state = engine.get_state(self.session)
+				self.assertEqual(state["phase"], "scoreboard")
 				engine.advance_session(self.session_doc, state, "advance")
 
-		self.assertEqual([e["type"] for e in events], ["question_closed", "explanation", "get_ready"])
+		self.assertEqual(
+			[e["type"] for e in events],
+			["question_closed", "explanation", "scoreboard", "get_ready"],
+		)
 		self.assertEqual(engine.get_state(self.session)["q_index"], 1)
 
 	def test_quiz_sets_how_long_the_explanation_stays_up(self):

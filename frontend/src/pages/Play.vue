@@ -411,7 +411,7 @@ async function restore() {
 			phase.value = "locked";
 			stopCountdown();
 		}
-	} else if (state.phase === "closed" || state.phase === "explanation") {
+	} else if (["closed", "explanation", "scoreboard"].includes(state.phase)) {
 		explanation.value = state.explanation || null;
 		await showResult({ question_row: state.question.question_row });
 	} else {

@@ -80,12 +80,9 @@ def get_host_state(session: str | None = None) -> dict:
 	if session_doc.status == "Lobby":
 		return result
 
-	leaderboard = get_leaderboard(session_doc.name)
-	result["top_5"] = leaderboard[:5]
-
 	state = engine.get_state(session_doc.name)
 	if not state:
-		result["leaderboard"] = leaderboard
+		result["leaderboard"] = get_leaderboard(session_doc.name)
 		return result
 
 	question = get_question_row(session_doc, state["question_row"])
@@ -115,6 +112,8 @@ def get_host_state(session: str | None = None) -> dict:
 			distribution[str(answer.selected_option)] += 1
 		result["distribution"] = distribution
 		result["explanation_next"] = bool(state.get("explanation_after"))
+	if state["status"] == "scoreboard":
+		result["scoreboard"] = state["scoreboard"]
 	return result
 
 

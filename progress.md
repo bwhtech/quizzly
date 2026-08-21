@@ -1,5 +1,47 @@
 # Progress
 
+## Phase 12: Scoreboard screen (2026-08-22)
+
+Spec: `specs/phase-12-scoreboard-screen.md`. The screen that ends a question is
+now two: the answer split, then the standings.
+
+### Done
+
+- `engine.py`: new `scoreboard` phase, always the last beat before the next
+  question, whichever side the explanation sits on. `close_question` builds the
+  standings (score, points won, new rank, previous rank) and parks them in Redis
+  state; `carry_over` hands them through the phases in between untouched. The
+  last question skips the screen: the podium is the standings.
+- The top five and the streak callouts move off the stats payload onto the
+  scoreboard one. The stats screen is the distribution alone now.
+- `get_host_state` returns the parked standings for a reload during the phase,
+  and drops the `top_5` nothing read any more.
+- `Host.vue`: standings screen. Rows open in the old order with the old scores,
+  then the points count up on every row while the rows move to their new places.
+  `TransitionGroup` keyed by nickname does the move, so row identity survives the
+  re-sort. The rank column reads as list position until the rows land, or a
+  player who fell out of the top five leaves a gap in the numbering.
+- Reload during the phase paints the settled board with no replay.
+
+### Verified
+
+E2E on `quizzly.localhost` at 1920x1080, six players answering over the API, a
+real worker driving the loop:
+
+- Question closes to the distribution bars alone, `Show scores` moves on.
+- Standings open in the previous order at the previous scores, `+974` chips land
+  and the rows overtake: ann and eve climb from 4th and 5th past cid, bob, dee.
+- Host reload mid-standings comes back to the same five rows, settled.
+- Last question's button reads `Final results` and goes straight to the podium.
+
+### Notes
+
+- Engine tests cover the new phase both ways round the explanation and the
+  last-question skip: 31 green in `tests/test_engine.py`, plus api/game_ux green.
+- A dev-bench aside, not this app: the single bench worker serves `long` after
+  `default`, so a five-minute job from another site can starve the ticker and the
+  game abandons itself. The host reload settles it, as designed.
+
 ## Phase 11: Quiz preview (2026-08-20)
 
 Spec: `specs/phase-11-quiz-preview.md`. Preview in the editor plays the quiz

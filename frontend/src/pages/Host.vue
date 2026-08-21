@@ -236,6 +236,88 @@
 			</div>
 		</template>
 
+		<!-- Scoreboard: the points land, then the rows climb to their new places -->
+		<template v-else-if="phase === 'scoreboard'">
+			<div
+				class="flex min-h-0 flex-1 flex-col items-center justify-center gap-6 p-5 sm:gap-8 sm:p-8"
+			>
+				<div class="text-center">
+					<p class="font-mono text-xs uppercase tracking-[0.28em] text-paper/40">
+						After question {{ (scoreboard?.q_index ?? 0) + 1 }} of
+						{{ scoreboard?.total }}
+					</p>
+					<h1 class="mt-2 font-display text-4xl font-extrabold text-paper sm:text-6xl">
+						Scoreboard
+					</h1>
+				</div>
+
+				<TransitionGroup
+					tag="ol"
+					name="rank"
+					class="flex min-h-0 w-full max-w-3xl flex-col gap-2.5 overflow-y-auto p-1"
+				>
+					<li
+						v-for="(entry, place) in standings"
+						:key="entry.nickname"
+						class="flex items-center gap-4 rounded-2xl border bg-dusk px-4 py-3 sm:px-5 sm:py-4"
+						:class="settled && entry.rank === 1 ? 'border-accent' : 'border-haze'"
+					>
+						<!-- until the rows land, the number is where the row sits, not the rank it
+						     came from: a top five missing a player who fell out of it would gap -->
+						<span class="w-6 shrink-0 font-mono text-lg tabular-nums text-paper/35">
+							{{ settled ? entry.rank : place + 1 }}
+						</span>
+						<AvatarPic :id="entry.avatar" :nickname="entry.nickname" :size="44" />
+						<span
+							class="min-w-0 flex-1 truncate font-display text-xl font-bold text-paper sm:text-2xl"
+						>
+							{{ entry.nickname }}
+						</span>
+						<span
+							v-if="entry.gained"
+							class="font-mono text-base font-bold text-ok transition-opacity duration-500 sm:text-lg"
+							:class="settled ? 'opacity-0' : 'opacity-100'"
+						>
+							+{{ entry.gained }}
+						</span>
+						<span
+							class="w-24 shrink-0 text-right font-mono text-xl font-bold tabular-nums text-accent sm:text-2xl"
+						>
+							{{ shownScores[entry.nickname] ?? entry.score }}
+						</span>
+					</li>
+				</TransitionGroup>
+
+				<ul
+					v-if="streaks.length"
+					class="flex flex-wrap justify-center gap-x-6 gap-y-2 text-base text-paper/70 sm:text-lg"
+				>
+					<li
+						v-for="entry in streaks"
+						:key="entry.nickname"
+						class="flex items-center gap-2"
+					>
+						<AvatarPic :id="entry.avatar" :nickname="entry.nickname" :size="28" />
+						🔥 {{ entry.nickname }} is on a {{ entry.streak }} answer streak
+					</li>
+				</ul>
+
+				<div class="flex flex-wrap items-center justify-center gap-3">
+					<button class="ctl ctl-go" @click="next">Next question</button>
+					<button
+						v-if="showHostControls"
+						class="ctl"
+						:data-on="autoAdvance"
+						@click="toggleAutoAdvance"
+					>
+						Auto-advance {{ autoAdvance ? "on" : "off" }}
+					</button>
+					<button v-if="showHostControls" class="ctl" @click="end">End game</button>
+					<p v-if="error" class="text-alert">{{ error }}</p>
+				</div>
+			</div>
+		</template>
+
 		<!-- Read time: question only, no answers yet -->
 		<template v-else-if="phase === 'get_ready'">
 			<div
@@ -288,7 +370,7 @@
 					/>
 					<div class="flex flex-wrap items-center justify-center gap-3">
 						<button class="ctl ctl-go" @click="next">
-							{{ explanation?.before_stats ? "Show results" : "Next question" }}
+							{{ explanation?.before_stats ? "Show results" : afterQuestionLabel }}
 						</button>
 						<button
 							v-if="showHostControls"
@@ -372,48 +454,6 @@
 								</div>
 							</div>
 						</div>
-
-						<div class="flex flex-wrap items-start justify-between gap-6 sm:gap-8">
-							<ol class="w-full flex-1 sm:min-w-64">
-								<li
-									v-for="(entry, index) in top5"
-									:key="entry.nickname"
-									class="flex items-center justify-between gap-3 border-b border-haze py-2 text-base text-paper/70 sm:text-lg"
-								>
-									<span class="flex min-w-0 items-center gap-3">
-										<span
-											class="w-5 shrink-0 font-mono text-xs tabular-nums text-paper/35"
-										>
-											{{ index + 1 }}
-										</span>
-										<AvatarPic
-											:id="entry.avatar"
-											:nickname="entry.nickname"
-											:size="28"
-										/>
-										<span class="truncate">{{ entry.nickname }}</span>
-									</span>
-									<span class="shrink-0 font-mono tabular-nums">{{
-										entry.score
-									}}</span>
-								</li>
-							</ol>
-							<ul class="w-full flex-1 space-y-2 text-base text-paper/70 sm:text-lg">
-								<li
-									v-for="entry in streaks"
-									:key="entry.nickname"
-									class="flex items-center gap-2"
-								>
-									<AvatarPic
-										:id="entry.avatar"
-										:nickname="entry.nickname"
-										:size="28"
-									/>
-									🔥 {{ entry.nickname }} is on a {{ entry.streak }} answer
-									streak
-								</li>
-							</ul>
-						</div>
 					</template>
 
 					<div class="flex flex-wrap items-center gap-3">
@@ -425,7 +465,7 @@
 							Skip
 						</button>
 						<button v-if="phase === 'closed'" class="ctl ctl-go" @click="next">
-							{{ explanationNext ? "Show explanation" : "Next question" }}
+							{{ explanationNext ? "Show explanation" : afterQuestionLabel }}
 						</button>
 						<button
 							v-if="showHostControls"
@@ -445,7 +485,7 @@
 </template>
 
 <script setup>
-import { computed, inject, onMounted, ref, watch } from "vue";
+import { computed, inject, onMounted, onUnmounted, ref, watch } from "vue";
 import QRCode from "qrcode";
 import { call, readError } from "@/api";
 import { confirm } from "@/confirm";
@@ -460,8 +500,12 @@ import { initSound, muted, playCue, toggleMute } from "@/sound";
 const PODIUM_FILL = { 1: "bg-gold", 2: "bg-lagoon", 3: "bg-orchid" };
 // remembered so a reload on the podium restores it: get_host_state only auto-finds live sessions
 const HOSTED_SESSION_KEY = "qz_hosted_session";
+// long enough to read the old order before it moves, and to watch the points climb
+const CLIMB_DELAY_MS = 700;
+const TALLY_MS = 900;
 
 const socket = inject("$socket");
+let climbTimer = null;
 const {
 	remaining,
 	total: windowSeconds,
@@ -483,8 +527,11 @@ const distribution = ref({});
 const explanation = ref(null);
 const explanationNext = ref(false);
 const correctOption = ref(null);
-const top5 = ref([]);
 const streaks = ref([]);
+const scoreboard = ref(null);
+const standings = ref([]);
+const shownScores = ref({});
+const settled = ref(false);
 const leaderboard = ref([]);
 const qrDataUrl = ref("");
 const qrFullscreen = ref(false);
@@ -525,6 +572,13 @@ const barHeight = (optionId) => {
 	return Math.max(3, ((distribution.value[optionId] || 0) / max) * 100);
 };
 
+// After the last question there is nothing left to stand on but the podium.
+const afterQuestionLabel = computed(() =>
+	(question.value?.q_index ?? 0) >= (question.value?.total ?? 1) - 1
+		? "Final results"
+		: "Show scores"
+);
+
 // 2nd, 1st, 3rd — the winner stands in the middle
 const podiumOrder = computed(() =>
 	[leaderboard.value[1], leaderboard.value[0], leaderboard.value[2]].filter(Boolean)
@@ -559,15 +613,56 @@ function onSessionEvent(message) {
 		explanationNext.value = Boolean(message.explanation_next);
 		distribution.value = message.distribution;
 		correctOption.value = message.correct_option;
-		top5.value = message.top_5;
-		streaks.value = message.streaks;
 		phase.value = "closed";
+	} else if (message.type === "scoreboard") {
+		stopCountdown();
+		showScoreboard(message);
 	} else if (message.type === "podium") {
 		stopCountdown();
 		leaderboard.value = message.leaderboard;
 		phase.value = "podium";
 		playCue("podium");
 	}
+}
+
+// The screen opens on the standings the room already knows, then the points land and
+// the rows race to where they belong. `animate` is off on a reload: nothing to replay.
+function showScoreboard(message, animate = true) {
+	const entries = message.standings || [];
+	clearTimeout(climbTimer);
+	scoreboard.value = message;
+	streaks.value = message.streaks || [];
+	standings.value = byRank(entries, animate ? "previous_rank" : "rank");
+	shownScores.value = scoresAt(
+		entries,
+		animate ? (entry) => entry.score - entry.gained : (entry) => entry.score
+	);
+	settled.value = !animate;
+	phase.value = "scoreboard";
+	if (!animate) return;
+	climbTimer = setTimeout(() => {
+		standings.value = byRank(entries, "rank");
+		tallyScores(entries);
+	}, CLIMB_DELAY_MS);
+}
+
+const byRank = (entries, key) => [...entries].sort((a, b) => a[key] - b[key]);
+
+const scoresAt = (entries, score) =>
+	Object.fromEntries(entries.map((entry) => [entry.nickname, score(entry)]));
+
+function tallyScores(entries) {
+	const start = performance.now();
+	const step = (now) => {
+		const progress = Math.min(1, (now - start) / TALLY_MS);
+		const eased = 1 - Math.pow(1 - progress, 3);
+		shownScores.value = scoresAt(entries, (entry) =>
+			Math.round(entry.score - entry.gained * (1 - eased))
+		);
+		if (progress < 1) requestAnimationFrame(step);
+		else settled.value = true;
+	};
+	requestAnimationFrame(step);
 }
 
 // Level H redundancy is what buys the room to punch the logo over the middle.
@@ -613,7 +708,6 @@ async function applyState(state) {
 	lobbyLocked.value = Boolean(state.lobby_locked);
 	autoAdvance.value = Boolean(state.auto_advance);
 	showHostControls.value = Boolean(state.show_host_controls);
-	top5.value = state.top_5 || [];
 	qrDataUrl.value = await renderQr(joinUrl.value);
 
 	if (state.status === "Lobby") {
@@ -634,6 +728,8 @@ async function applyState(state) {
 		correctOption.value = state.question.correct_option;
 		phase.value = "explanation";
 		if (autoAdvance.value) startCountdown(state.remaining_seconds);
+	} else if (state.phase === "scoreboard") {
+		showScoreboard(state.scoreboard, false);
 	} else if (state.phase === "closed") {
 		question.value = state.question;
 		distribution.value = state.distribution || {};
@@ -746,6 +842,8 @@ async function end() {
 	// a cancelled lobby has no podium to land on, so the host goes back to the quiz list
 	if ((await hostCall("quizzly.api.end_session")) && inLobby) reset();
 }
+
+onUnmounted(() => clearTimeout(climbTimer));
 
 function reset() {
 	localStorage.removeItem(HOSTED_SESSION_KEY);

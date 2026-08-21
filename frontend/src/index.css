@@ -210,6 +210,11 @@ body {
 	}
 }
 
+/* Standings: rows keep their identity, so the list re-orders as a move, not a repaint. */
+.rank-move {
+	transition: transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
 /* The avatar strip says "this scrolls" with faces cut off at the gutter, so
    the bar underneath is noise. */
 .no-scrollbar {

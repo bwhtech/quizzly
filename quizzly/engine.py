@@ -14,6 +14,7 @@ from frappe.utils import now_datetime, time_diff_in_seconds
 
 GRACE_SECONDS = 1.0
 STATS_SECONDS = 5
+SCOREBOARD_SECONDS = 5
 GETREADY_SECONDS = 3
 EXPLANATION_SECONDS = 10
 # ponytail: host gets 5 minutes to hit Next, then the game moves on by itself
@@ -136,13 +137,16 @@ def advance_session(session_doc, state: dict, control: str | None) -> None:
 			if state.get("closed_payload"):
 				show_stats(session_doc, state, state["closed_payload"])
 			else:
-				next_question(session_doc, questions, index, total)
+				show_standings(session_doc, state, questions, index, total)
 	elif phase == "stats":
 		if due or control == "advance":
 			if state.get("explanation_after"):
 				show_explanation(session_doc, state, state["explanation_after"])
 			else:
-				next_question(session_doc, questions, index, total)
+				show_standings(session_doc, state, questions, index, total)
+	elif phase == "scoreboard":
+		if due or control == "advance":
+			next_question(session_doc, questions, index, total)
 
 
 def next_question(session_doc, questions, index: int, total: int) -> None:
@@ -219,12 +223,14 @@ def close_question(session_doc, question, index: int, total: int) -> None:
 	distribution = {"1": 0, "2": 0, "3": 0, "4": 0}
 	answer_updates = {}
 	participant_updates = {}
+	gained = {}
 
 	for participant in participants:
 		answer = answer_by_participant.get(participant.name)
 		if not answer:
 			participant.streak = 0
 			participant_updates[participant.name] = {"streak": 0}
+			gained[participant.name] = 0
 			continue
 		distribution[str(answer.selected_option)] += 1
 		is_correct = str(answer.selected_option) == str(question.correct_option)
@@ -237,16 +243,13 @@ def close_question(session_doc, question, index: int, total: int) -> None:
 			participant.streak = 0
 			points = 0
 		participant.score += points
+		gained[participant.name] = points
 		answer_updates[answer.name] = {"is_correct": int(is_correct), "points": points}
 		participant_updates[participant.name] = {"score": participant.score, "streak": participant.streak}
 
 	frappe.db.bulk_update("QZ Answer", answer_updates)
 	frappe.db.bulk_update("QZ Participant", participant_updates)
 
-	top_5 = [
-		{"nickname": p.nickname, "avatar": p.avatar, "score": p.score}
-		for p in sorted(participants, key=lambda p: -p.score)[:5]
-	]
 	streaks = [
 		{"nickname": p.nickname, "avatar": p.avatar, "streak": p.streak}
 		for p in sorted(participants, key=lambda p: -p.streak)
@@ -259,9 +262,18 @@ def close_question(session_doc, question, index: int, total: int) -> None:
 		"question_row": question.name,
 		"correct_option": question.correct_option,
 		"distribution": distribution,
-		"top_5": top_5,
-		"streaks": streaks,
 		"is_last": index == total - 1,
+	}
+	# parked in state so every later phase can hand it on until the standings screen
+	state = {
+		**state,
+		"scoreboard": {
+			"type": "scoreboard",
+			"q_index": index,
+			"total": total,
+			"standings": build_standings(participants, gained),
+			"streaks": streaks,
+		},
 	}
 	frappe.cache.delete_value(answered_key(session_doc.name, question.name))
 
@@ -310,6 +322,48 @@ def show_stats(session_doc, state: dict, closed: dict, explanation_after: dict |
 		ttl=ADVANCE_WAIT_CAP + STATE_TTL_MARGIN,
 	)
 	publish_session_event(session_doc, {**closed, "explanation_next": bool(explanation_after)})
+
+
+def show_standings(session_doc, state: dict, questions, index: int, total: int) -> None:
+	"""Standings are the last beat of a question. On the last one the podium says it better."""
+	scoreboard = state.get("scoreboard")
+	if scoreboard and index < total - 1:
+		show_scoreboard(session_doc, state, scoreboard)
+	else:
+		next_question(session_doc, questions, index, total)
+
+
+def show_scoreboard(session_doc, state: dict, scoreboard: dict) -> None:
+	"""Who is where now, and where they were before the points landed."""
+	next_ts = time.time() + hold_seconds(session_doc, SCOREBOARD_SECONDS)
+	set_state(
+		session_doc.name,
+		{**carry_over(state), "phase": "scoreboard", "status": "scoreboard", "next_ts": next_ts},
+		ttl=ADVANCE_WAIT_CAP + STATE_TTL_MARGIN,
+	)
+	publish_session_event(session_doc, scoreboard)
+
+
+def build_standings(participants: list, gained: dict, top: int = 5) -> list[dict]:
+	"""Both places every row has to be in: the one it starts the screen at and the one it
+	climbs to. Ties break on join time, the same way the podium ranks them."""
+
+	def in_order(score_of):
+		return sorted(participants, key=lambda p: (-score_of(p), p.joined_at or now_datetime()))
+
+	before = in_order(lambda p: p.score - gained.get(p.name, 0))
+	previous_rank = {p.name: rank for rank, p in enumerate(before, start=1)}
+	return [
+		{
+			"nickname": p.nickname,
+			"avatar": p.avatar,
+			"score": p.score,
+			"gained": gained.get(p.name, 0),
+			"rank": rank,
+			"previous_rank": previous_rank[p.name],
+		}
+		for rank, p in enumerate(in_order(lambda p: p.score), start=1)
+	][:top]
 
 
 def carry_over(state: dict) -> dict:
