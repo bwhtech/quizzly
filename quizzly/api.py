@@ -5,7 +5,6 @@ import time
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.rate_limiter import rate_limit
 from frappe.utils import now_datetime, strip_html_tags
 
 from quizzly import engine
@@ -178,7 +177,6 @@ def list_quizzes() -> list[dict]:
 # Guests join by design (no login); rate-limited, PIN-gated, and input is sanitized below.
 # nosemgrep: frappe-semgrep-rules.rules.security.guest-whitelisted-method
 @frappe.whitelist(allow_guest=True, methods=["POST"])
-@rate_limit(limit=10, seconds=60)
 def join_session(pin: str, nickname: str, avatar: str | None = None) -> dict:
 	session = get_session_by_pin(pin)
 	if session.status != "Lobby":
@@ -216,7 +214,6 @@ def join_session(pin: str, nickname: str, avatar: str | None = None) -> dict:
 
 
 @frappe.whitelist(allow_guest=True, methods=["POST"])
-@rate_limit(key="token", limit=30, seconds=60)
 def submit_answer(pin: str, token: str, question_row: str, selected_option: str) -> dict:
 	received_at = time.time()
 	session = get_session_by_pin(pin)
@@ -256,7 +253,6 @@ def submit_answer(pin: str, token: str, question_row: str, selected_option: str)
 # Players are guests by design; the participant token gates every read below.
 # nosemgrep: frappe-semgrep-rules.rules.security.guest-whitelisted-method
 @frappe.whitelist(allow_guest=True)
-@rate_limit(key="token", limit=60, seconds=60)
 def get_state(pin: str, token: str) -> dict:
 	session = get_session_by_pin(pin)
 	participant = get_participant_by_token(session, token)
@@ -296,7 +292,6 @@ def get_state(pin: str, token: str) -> dict:
 
 
 @frappe.whitelist(allow_guest=True)
-@rate_limit(key="token", limit=60, seconds=60)
 def get_result(pin: str, token: str, question_row: str) -> dict:
 	"""Own outcome for the result interstitial; the broadcast stays free of per-player data."""
 	session = get_session_by_pin(pin)
@@ -320,7 +315,6 @@ def get_result(pin: str, token: str, question_row: str) -> dict:
 
 
 @frappe.whitelist(allow_guest=True, methods=["POST"])
-@rate_limit(limit=10, seconds=60)
 def leave_session(pin: str, token: str) -> None:
 	session = get_session_by_pin(pin)
 	participant = get_participant_by_token(session, token)
