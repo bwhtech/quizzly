@@ -216,7 +216,7 @@
 				</div>
 				<ol class="qz-fade-b min-h-24 w-full max-w-md flex-1 overflow-y-auto">
 					<li
-						v-for="entry in leaderboard"
+						v-for="entry in leaderboard.slice(0, 25)"
 						:key="entry.nickname"
 						class="flex items-center justify-between gap-3 border-b border-haze py-2.5 text-base text-paper/70 sm:text-lg"
 					>
