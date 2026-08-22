@@ -111,7 +111,7 @@
 					     players cannot push Start off the projector. No flex-1: the box has to
 					     hug its rows, or a half-empty lobby strands them below the count. -->
 					<div
-						class="flex min-h-24 w-full max-w-5xl flex-wrap justify-center gap-2.5 overflow-y-auto p-1"
+						class="no-scrollbar flex min-h-24 w-full max-w-5xl flex-wrap justify-center gap-2.5 overflow-y-auto p-1"
 					>
 						<!-- The chip itself is not the kick target: a full-name-sized button is
 						     too easy to hit by accident on a projector. -->
@@ -216,7 +216,7 @@
 						</div>
 					</div>
 				</div>
-				<ol class="min-h-24 w-full max-w-md overflow-y-auto">
+				<ol class="no-scrollbar min-h-24 w-full max-w-md overflow-y-auto">
 					<li
 						v-for="entry in leaderboard.slice(0, 25)"
 						:key="entry.nickname"
