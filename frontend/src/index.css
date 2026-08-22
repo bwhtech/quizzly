@@ -145,12 +145,6 @@ body {
 	filter: brightness(1.1);
 }
 
-/* Scrollers that run past their box: the cut-off last row should read as
-   "there is more", not as a clipped layout. */
-.qz-fade-b {
-	mask-image: linear-gradient(to bottom, #000 calc(100% - 2.5rem), transparent);
-}
-
 /* Dialogs: the default <dialog> lands white and unanimated on a dark app. */
 .qz-dialog {
 	margin: auto;

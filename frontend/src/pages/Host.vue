@@ -99,7 +99,7 @@
 					</button>
 				</div>
 
-				<div class="flex min-h-0 flex-1 flex-col items-center gap-5">
+				<div class="flex min-h-0 flex-1 flex-col items-center justify-center gap-5">
 					<p
 						v-if="participants.length"
 						class="font-mono text-xs uppercase tracking-[0.28em] text-paper/40"
@@ -107,12 +107,11 @@
 						{{ participants.length }}
 						{{ participants.length === 1 ? "player" : "players" }} in
 					</p>
-					<!-- own scroller: a full room of players otherwise pushes Start off the projector.
-					     safe center, not plain center: a half-empty lobby centres its rows, but a
-					     full one aligns to the start so the first row stays scrollable into view.
-					     content-center rides along as the fallback where safe is unsupported. -->
+					<!-- shrinks to the space left over and scrolls inside it, so a full room of
+					     players cannot push Start off the projector. No flex-1: the box has to
+					     hug its rows, or a half-empty lobby strands them below the count. -->
 					<div
-						class="qz-fade-b flex min-h-24 w-full max-w-5xl flex-1 flex-wrap content-center justify-center gap-2.5 overflow-y-auto p-1 [align-content:safe_center]"
+						class="flex min-h-24 w-full max-w-5xl flex-wrap justify-center gap-2.5 overflow-y-auto p-1"
 					>
 						<!-- The chip itself is not the kick target: a full-name-sized button is
 						     too easy to hit by accident on a projector. -->
@@ -217,7 +216,7 @@
 						</div>
 					</div>
 				</div>
-				<ol class="qz-fade-b min-h-24 w-full max-w-md flex-1 overflow-y-auto">
+				<ol class="min-h-24 w-full max-w-md overflow-y-auto">
 					<li
 						v-for="entry in leaderboard.slice(0, 25)"
 						:key="entry.nickname"
