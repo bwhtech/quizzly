@@ -107,9 +107,12 @@
 						{{ participants.length }}
 						{{ participants.length === 1 ? "player" : "players" }} in
 					</p>
-					<!-- own scroller: a full room of players otherwise pushes Start off the projector -->
+					<!-- own scroller: a full room of players otherwise pushes Start off the projector.
+					     safe center, not plain center: a half-empty lobby centres its rows, but a
+					     full one aligns to the start so the first row stays scrollable into view.
+					     content-center rides along as the fallback where safe is unsupported. -->
 					<div
-						class="qz-fade-b flex min-h-24 w-full max-w-5xl flex-1 flex-wrap justify-center gap-2.5 overflow-y-auto p-1"
+						class="qz-fade-b flex min-h-24 w-full max-w-5xl flex-1 flex-wrap content-center justify-center gap-2.5 overflow-y-auto p-1 [align-content:safe_center]"
 					>
 						<!-- The chip itself is not the kick target: a full-name-sized button is
 						     too easy to hit by accident on a projector. -->
