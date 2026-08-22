@@ -412,7 +412,9 @@ async function restore() {
 			stopCountdown();
 		}
 	} else if (["closed", "explanation", "scoreboard"].includes(state.phase)) {
-		explanation.value = state.explanation || null;
+		// the beats after the explanation stop carrying it, so a resync landing on one of
+		// them must keep what the phone already has; showQuestion clears it next question
+		if (state.explanation) explanation.value = state.explanation;
 		await showResult({ question_row: state.question.question_row });
 	} else {
 		phase.value = "waiting";
