@@ -64,6 +64,9 @@ def get_host_state(session: str | None = None) -> dict:
 	session_doc = get_host_session(session) if session else get_live_host_session()
 	if not session_doc or session_doc.status == "Cancelled":
 		return {}
+	# the host screen is the most frequent caller, so revive a dead ticker here
+	# too: a game whose loop was killed resumes within a poll, not a scheduler minute
+	engine.ensure_ticker_running()
 	if engine.is_abandoned(session_doc):
 		# the host reloaded into a game whose worker is gone: settle it and show the podium
 		engine.finish_session(session_doc)

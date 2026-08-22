@@ -37,14 +37,34 @@ def enqueue_game_loop(session_doc) -> None:
 	clear_control(session_doc.name)
 	get_ready(session_doc, questions[0], 0, len(questions))
 	frappe.cache.sadd(ACTIVE_SESSIONS_KEY, session_doc.name)
+	# after_commit so the ticker only starts once the get_ready state and the
+	# active-set membership it reads are actually visible
+	enqueue_ticker(after_commit=True)
+
+
+def enqueue_ticker(after_commit: bool = False) -> None:
 	frappe.enqueue(
 		"quizzly.engine.run_ticker",
 		queue="long",
 		timeout=TICKER_TIMEOUT,
 		job_id="qz_ticker",
 		deduplicate=True,
-		enqueue_after_commit=True,
+		enqueue_after_commit=after_commit,
 	)
+
+
+def ensure_ticker_running() -> None:
+	"""Bring the shared ticker back if it died with games still live.
+
+	Every game is driven by this one loop. If its worker is lost mid-game — an OOM
+	under a large answer flood, a deploy or worker restart — nothing advances the
+	games and they freeze exactly where they stood, with no exception to log. A
+	deduplicated re-enqueue is a no-op while the loop is alive, and otherwise starts
+	a fresh one that resumes every game from the Redis state it left behind. Driven
+	from the scheduler and the host poll so recovery never needs a human.
+	"""
+	if active_sessions():
+		enqueue_ticker()
 
 
 def run_ticker() -> None:
