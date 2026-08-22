@@ -704,6 +704,9 @@ async function copyJoinUrl() {
 }
 
 async function applyState(state) {
+	// no session left to host: it was cancelled, or ended in another tab. Painting a game
+	// screen off an empty state is what put a NaN clock on the projector.
+	if (!state.session) return reset();
 	session.value = { name: state.session, game_pin: state.game_pin };
 	localStorage.setItem(HOSTED_SESSION_KEY, state.session);
 	participants.value = state.participants || [];
