@@ -521,3 +521,27 @@ class TestExplanationScreen(GameTestCase):
 		with patch("frappe.publish_realtime"), patch("frappe.db.commit"):
 			engine.close_question(self.session_doc, question, 0, len(self.questions))
 		self.assertEqual(engine.get_state(self.session)["phase"], "stats")
+
+
+class TestTickerRecovery(IntegrationTestCase):
+	"""The shared ticker can be killed mid-game (OOM under a large answer flood, a
+	worker restart). Nothing else advances a game, so it must be revivable."""
+
+	def setUp(self):
+		frappe.cache.delete_value(engine.ACTIVE_SESSIONS_KEY)
+
+	def tearDown(self):
+		frappe.cache.delete_value(engine.ACTIVE_SESSIONS_KEY)
+
+	def test_ensure_ticker_running_revives_when_a_game_is_live(self):
+		frappe.cache.sadd(engine.ACTIVE_SESSIONS_KEY, "some-session")
+		with patch("frappe.enqueue") as enqueue:
+			engine.ensure_ticker_running()
+		enqueue.assert_called_once()
+		self.assertEqual(enqueue.call_args.kwargs["job_id"], "qz_ticker")
+		self.assertTrue(enqueue.call_args.kwargs["deduplicate"])
+
+	def test_ensure_ticker_running_is_a_noop_with_no_live_games(self):
+		with patch("frappe.enqueue") as enqueue:
+			engine.ensure_ticker_running()
+		enqueue.assert_not_called()

@@ -29,3 +29,14 @@ website_route_rules = [
 
 export_python_type_annotations = True
 require_type_annotated_api_methods = True
+
+# The live-game loop is one shared background job; if its worker dies mid-game
+# nothing else advances the games. This re-enqueues it (deduplicated, so a live
+# loop is untouched) so a killed ticker recovers without a human.
+scheduler_events = {
+	"cron": {
+		"* * * * *": [
+			"quizzly.engine.ensure_ticker_running",
+		]
+	}
+}
