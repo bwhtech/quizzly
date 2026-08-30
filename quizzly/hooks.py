@@ -4,18 +4,15 @@ app_publisher = "Gajendra Nishad"
 app_description = "Real-time multiplayer quiz platform"
 app_email = "gajendra@bwh.tech"
 app_license = "mit"
-app_logo_url = "/assets/quizzly/images/quizzly-logo.svg"
 
 add_to_apps_screen = [
 	{
 		"name": "quizzly",
-		"logo": app_logo_url,
+		"logo": "/assets/quizzly/images/quizzly-logo.svg",
 		"title": "Quizzly",
 		"route": "/quizzly",
 	}
 ]
-
-website_context = {"favicon": app_logo_url}
 
 # Send non-GET requests for this app's endpoints as native `application/json`
 # bodies instead of form-encoded, per-key JSON-stringified values.
