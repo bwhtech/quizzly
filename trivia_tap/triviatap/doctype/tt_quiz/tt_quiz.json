@@ -1,7 +1,7 @@
 {
  "actions": [],
  "allow_import": 1,
- "autoname": "format:QZ-{####}",
+ "autoname": "format:TT-{####}",
  "creation": "2026-07-19 12:00:00",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -70,7 +70,7 @@
    "fieldname": "questions",
    "fieldtype": "Table",
    "label": "Questions",
-   "options": "QZ Question",
+   "options": "TT Question",
    "reqd": 1
   }
  ],
@@ -78,7 +78,7 @@
  "modified": "2026-08-20 10:00:00.000000",
  "modified_by": "Administrator",
  "module": "TriviaTap",
- "name": "QZ Quiz",
+ "name": "TT Quiz",
  "naming_rule": "Expression (old style)",
  "owner": "Administrator",
  "permissions": [

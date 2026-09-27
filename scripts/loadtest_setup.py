@@ -3,7 +3,7 @@
 # It also arms the game (Active + first get_ready) so a foreground run_ticker can
 # drive it deterministically, instead of depending on the dev bench's single RQ
 # worker actually scheduling the shared ticker in time.
-#   bench --site quizzly.localhost console < scripts/loadtest_setup.py
+#   bench --site trivia-tap.localhost console < scripts/loadtest_setup.py
 # Writes pin + tokens to /tmp/trivia_tap_loadtest.json for scripts/loadtest.py to drive.
 
 import json
@@ -16,10 +16,10 @@ import frappe
 from trivia_tap import api, engine
 
 QUIZ_TITLE = "General Knowledge"
-PLAYERS = int(os.environ.get("QZ_LOADTEST_PLAYERS", "100"))
+PLAYERS = int(os.environ.get("TT_LOADTEST_PLAYERS", "100"))
 STATE_FILE = Path("/tmp/trivia_tap_loadtest.json")
 
-quiz = frappe.db.get_value("QZ Quiz", {"title": QUIZ_TITLE}, "name")
+quiz = frappe.db.get_value("TT Quiz", {"title": QUIZ_TITLE}, "name")
 assert quiz, f"seed {QUIZ_TITLE!r} first (scripts/seed_demo.py)"
 
 frappe.set_user("Administrator")
@@ -31,7 +31,7 @@ for i in range(PLAYERS):
 	token = secrets.token_hex(32)
 	frappe.get_doc(
 		{
-			"doctype": "QZ Participant",
+			"doctype": "TT Participant",
 			"session": session_name,
 			"nickname": f"bot{i:02d}",
 			"token_hash": api.hash_token(token),
@@ -40,7 +40,7 @@ for i in range(PLAYERS):
 	).insert(ignore_permissions=True)
 	tokens.append(token)
 
-session = frappe.get_doc("QZ Session", session_name)
+session = frappe.get_doc("TT Session", session_name)
 session.status = "Active"
 session.started_at = frappe.utils.now_datetime()
 session.auto_advance = 1

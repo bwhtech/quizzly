@@ -1,7 +1,7 @@
 {
  "app": "trivia_tap",
  "charts": [],
- "content": "[{\"id\":\"qz_sc_quiz\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"QZ Quiz\",\"col\":3}},{\"id\":\"qz_sc_session\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"QZ Session\",\"col\":3}},{\"id\":\"qz_spacer\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"qz_card_content\",\"type\":\"card\",\"data\":{\"card_name\":\"Content\",\"col\":4}},{\"id\":\"qz_card_gameplay\",\"type\":\"card\",\"data\":{\"card_name\":\"Gameplay\",\"col\":4}}]",
+ "content": "[{\"id\":\"tt_sc_quiz\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"TT Quiz\",\"col\":3}},{\"id\":\"tt_sc_session\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"TT Session\",\"col\":3}},{\"id\":\"tt_spacer\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"tt_card_content\",\"type\":\"card\",\"data\":{\"card_name\":\"Content\",\"col\":4}},{\"id\":\"tt_card_gameplay\",\"type\":\"card\",\"data\":{\"card_name\":\"Gameplay\",\"col\":4}}]",
  "creation": "2026-07-20 00:00:00.000000",
  "custom_blocks": [],
  "docstatus": 0,
@@ -26,9 +26,9 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "QZ Quiz",
+   "label": "TT Quiz",
    "link_count": 0,
-   "link_to": "QZ Quiz",
+   "link_to": "TT Quiz",
    "link_type": "DocType",
    "onboard": 1,
    "type": "Link"
@@ -46,9 +46,9 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "QZ Session",
+   "label": "TT Session",
    "link_count": 0,
-   "link_to": "QZ Session",
+   "link_to": "TT Session",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
@@ -56,9 +56,9 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "QZ Participant",
+   "label": "TT Participant",
    "link_count": 0,
-   "link_to": "QZ Participant",
+   "link_to": "TT Participant",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
@@ -66,15 +66,15 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "QZ Answer",
+   "label": "TT Answer",
    "link_count": 0,
-   "link_to": "QZ Answer",
+   "link_to": "TT Answer",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
   }
  ],
- "modified": "2026-07-20 00:00:00.000000",
+ "modified": "2026-09-27 23:31:47.000000",
  "modified_by": "Administrator",
  "module": "TriviaTap",
  "name": "TriviaTap",
@@ -88,16 +88,16 @@
   {
    "color": "Orange",
    "doc_view": "List",
-   "label": "QZ Quiz",
-   "link_to": "QZ Quiz",
+   "label": "TT Quiz",
+   "link_to": "TT Quiz",
    "stats_filter": "[]",
    "type": "DocType"
   },
   {
    "color": "Blue",
    "doc_view": "List",
-   "label": "QZ Session",
-   "link_to": "QZ Session",
+   "label": "TT Session",
+   "link_to": "TT Session",
    "stats_filter": "[]",
    "type": "DocType"
   }
@@ -109,8 +109,8 @@
    "icon": "list-checks",
    "indent": 0,
    "keep_closed": 0,
-   "label": "QZ Quiz",
-   "link_to": "QZ Quiz",
+   "label": "TT Quiz",
+   "link_to": "TT Quiz",
    "link_type": "DocType",
    "open_in_new_tab": 0,
    "show_arrow": 0,
@@ -122,8 +122,8 @@
    "icon": "play",
    "indent": 0,
    "keep_closed": 0,
-   "label": "QZ Session",
-   "link_to": "QZ Session",
+   "label": "TT Session",
+   "link_to": "TT Session",
    "link_type": "DocType",
    "open_in_new_tab": 0,
    "show_arrow": 0,
@@ -135,8 +135,8 @@
    "icon": "users",
    "indent": 0,
    "keep_closed": 0,
-   "label": "QZ Participant",
-   "link_to": "QZ Participant",
+   "label": "TT Participant",
+   "link_to": "TT Participant",
    "link_type": "DocType",
    "open_in_new_tab": 0,
    "show_arrow": 0,
@@ -148,8 +148,8 @@
    "icon": "check-check",
    "indent": 0,
    "keep_closed": 0,
-   "label": "QZ Answer",
-   "link_to": "QZ Answer",
+   "label": "TT Answer",
+   "link_to": "TT Answer",
    "link_type": "DocType",
    "open_in_new_tab": 0,
    "show_arrow": 0,

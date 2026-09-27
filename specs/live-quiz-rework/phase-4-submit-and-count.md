@@ -12,13 +12,13 @@ Submit path is minimal and answer-count network load is flat regardless of playe
 with no loss of the live counter's usefulness.
 
 ## Changes
-`quizzly/api.py` — `submit_answer`:
+`trivia_tap/api.py` — `submit_answer`:
 - Add `ignore_links=True` to the insert: `.insert(ignore_permissions=True, ignore_links=True)`.
   Session-active + participant-by-token already validated (api.py:214-216); the
   `(participant, question_row)` unique index still backstops duplicates.
 - Remove the `answer_count` `publish_session_event` block (api.py:243-250).
 
-`quizzly/engine.py` — ticker:
+`trivia_tap/engine.py` — ticker:
 - In each pass, for a session in the open-question phase, `maybe_push_answer_count`: read
   `answered_count`, and if it changed since last push **and** ≥~300ms elapsed, broadcast the
   new count. At most a few updates/sec total, independent of player count.
@@ -26,7 +26,7 @@ with no loss of the live counter's usefulness.
 ## Test (end-to-end feedback)
 1. `/agent-browser`: play with 3+ guests; host's live answer count still climbs smoothly as
    guests answer (now driven by the ticker, not per-submit). Duplicate submit still rejected.
-2. `bench ... run-tests --app quizzly` green (adjust any test asserting a per-submit
+2. `bench ... run-tests --app trivia_tap` green (adjust any test asserting a per-submit
    answer_count broadcast).
 3. Load check: many concurrent submits → confirm answer_count broadcasts are throttled
    (a few/sec), not one-per-submit.

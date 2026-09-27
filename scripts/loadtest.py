@@ -15,7 +15,7 @@ from pathlib import Path
 
 import requests
 
-ORIGIN = os.environ.get("QZ_LOADTEST_ORIGIN", "http://quizzly.localhost:8000")
+ORIGIN = os.environ.get("TT_LOADTEST_ORIGIN", "http://trivia-tap.localhost:8000")
 BASE = f"{ORIGIN}/api/method/trivia_tap.api"
 STATE_FILE = Path("/tmp/trivia_tap_loadtest.json")
 

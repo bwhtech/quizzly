@@ -5,7 +5,7 @@ from frappe.model.document import Document
 from trivia_tap.avatars import default_avatar, is_valid_avatar
 
 
-class QZParticipant(Document):
+class TTParticipant(Document):
 	# begin: auto-generated types
 	# This code is auto-generated. Do not modify anything in this block.
 
@@ -32,7 +32,7 @@ class QZParticipant(Document):
 		self.validate_avatar()
 		# ponytail: exists-check has a race window; a duplicate slipping through is cosmetic
 		duplicate = frappe.db.exists(
-			"QZ Participant",
+			"TT Participant",
 			{
 				"session": self.session,
 				"nickname": self.nickname,

@@ -518,7 +518,7 @@ import { initSound, muted, playCue, toggleMute } from "@/sound";
 
 const PODIUM_FILL = { 1: "bg-gold", 2: "bg-lagoon", 3: "bg-orchid" };
 // remembered so a reload on the podium restores it: get_host_state only auto-finds live sessions
-const HOSTED_SESSION_KEY = "qz_hosted_session";
+const HOSTED_SESSION_KEY = "tt_hosted_session";
 // long enough to read the old order before it moves, and to watch the points climb
 const CLIMB_DELAY_MS = 700;
 const TALLY_MS = 900;

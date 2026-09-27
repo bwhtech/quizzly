@@ -1,6 +1,6 @@
 import { ref } from "vue";
 
-const KEY = "qz_muted";
+const KEY = "tt_muted";
 
 // Phones in a room all unmuting at once is a bad time, so players start silent
 // while the host screen, which is the one plugged into speakers, starts audible.

@@ -10,12 +10,12 @@ Two new ways to run the same quiz: shared-screen (classic Kahoot, one projector)
 
 Shared-screen first, it is a payload change and nothing more. Team mode second, it is the only thing in Phase 4 that touches scoring.
 
-1. `shared_screen` flag on `QZ Session`, host toggles it in the lobby, player question payload drops `question_text` and option labels. **Feedback: a game runs with the projector holding the question and phones holding only shapes.**
+1. `shared_screen` flag on `TT Session`, host toggles it in the lobby, player question payload drops `question_text` and option labels. **Feedback: a game runs with the projector holding the question and phones holding only shapes.**
 2. `team_mode` flag, teams assigned in the lobby, leaderboard aggregates by team. **Feedback: a two-team game reaches a team podium.**
 
 ## Shared-screen mode
 
-`QZ Session.shared_screen` — Check, settable only while status is `Lobby`.
+`TT Session.shared_screen` — Check, settable only while status is `Lobby`.
 
 The engine is untouched. `publish_question` strips `question_text`, `image_url`, and the option `label` fields from the player payload when the flag is on, keeping option ids and colors. Host payload is unchanged.
 
@@ -25,8 +25,8 @@ Player question view renders four large shape buttons filling the screen, no tex
 
 ## Team mode
 
-`QZ Session.team_mode` — Check, settable only while status is `Lobby`.
-`QZ Participant.team` — Data, the team name, empty in solo mode.
+`TT Session.team_mode` — Check, settable only while status is `Lobby`.
+`TT Participant.team` — Data, the team name, empty in solo mode.
 
 New DocType is not worth it: a team is a name and a color, both derivable from a fixed palette, and it has no lifecycle of its own outside a session.
 
@@ -42,7 +42,7 @@ Per-player scoring, streaks, and the answer gauntlet are all completely unchange
 - Team rank = by team score, ties broken by earliest last-answer time, matching the existing player tiebreak.
 - Streak callouts stay per player.
 
-`QZ Answer` gains nothing. Team membership is resolved through `QZ Participant`.
+`TT Answer` gains nothing. Team membership is resolved through `TT Participant`.
 
 ### Presentation
 

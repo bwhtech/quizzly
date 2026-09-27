@@ -24,7 +24,7 @@
 					</span>
 					<input
 						v-model="pin"
-						class="w-full rounded-2xl border border-haze bg-dusk py-4 text-center font-mono text-4xl font-bold tracking-[0.18em] text-paper placeholder:text-paper/20 focus:border-ember"
+						class="w-full rounded-2xl border border-haze bg-dusk py-4 text-center font-mono text-4xl font-bold tracking-[0.18em] text-paper placeholder:text-paper/20 focus:border-ember focus:ring-0"
 						placeholder="000000"
 						inputmode="numeric"
 						maxlength="6"
@@ -38,7 +38,7 @@
 					</span>
 					<input
 						v-model="nickname"
-						class="w-full rounded-2xl border border-haze bg-dusk px-4 py-3.5 text-lg font-medium text-paper placeholder:text-paper/25 focus:border-ember"
+						class="w-full rounded-2xl border border-haze bg-dusk px-4 py-3.5 text-lg font-medium text-paper placeholder:text-paper/25 focus:border-ember focus:ring-0"
 						placeholder="Your name"
 						maxlength="20"
 						autocomplete="off"

@@ -8,7 +8,7 @@ from trivia_tap.api import create_session, list_quizzes
 
 def question(text="2 + 2?", **overrides) -> dict:
 	row = {
-		"doctype": "QZ Question",
+		"doctype": "TT Question",
 		"question_text": text,
 		"option_1": "3",
 		"option_2": "4",
@@ -22,7 +22,7 @@ def question(text="2 + 2?", **overrides) -> dict:
 
 def quiz_doc(questions, base=None) -> dict:
 	"""The editor sends back the doc it loaded, with the questions rebuilt in display order."""
-	return {**(base or {}), "doctype": "QZ Quiz", "title": "Authored Quiz", "questions": questions}
+	return {**(base or {}), "doctype": "TT Quiz", "title": "Authored Quiz", "questions": questions}
 
 
 class TestQuizAuthoring(IntegrationTestCase):
@@ -38,7 +38,7 @@ class TestQuizAuthoring(IntegrationTestCase):
 		reordered = save(quiz_doc([question("Third"), question("First")], base=saved))
 
 		rows = frappe.get_all(
-			"QZ Question",
+			"TT Question",
 			filters={"parent": reordered["name"]},
 			fields=["question_text"],
 			order_by="idx asc",
@@ -65,11 +65,11 @@ class TestQuizAuthoring(IntegrationTestCase):
 		create_session(saved["name"])
 
 		with self.assertRaises(frappe.LinkExistsError):
-			delete("QZ Quiz", saved["name"])
+			delete("TT Quiz", saved["name"])
 
 	def test_image_rides_along_on_the_question_payload(self):
 		saved = save(quiz_doc([question(image="/files/cat.png"), question("No picture")]))
-		session = frappe.get_doc("QZ Session", create_session(saved["name"])["session"])
+		session = frappe.get_doc("TT Session", create_session(saved["name"])["session"])
 		questions = engine.get_quiz_questions(session)
 
 		payloads = [engine.question_payload(session, q, 0, 2, 0.0) for q in questions]

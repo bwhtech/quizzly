@@ -11,7 +11,7 @@ Scripts:
   is the first argument.
 - `loadtest_setup.py` — runs in frappe context. Mints participants directly (skips
   the single-IP join throttle, an artifact of driving from one host) and arms the
-  game. Reads player count from `QZ_LOADTEST_PLAYERS` (default 100).
+  game. Reads player count from `TT_LOADTEST_PLAYERS` (default 100).
 - `loadtest.py` — the HTTP driver. Reads `/tmp/trivia_tap_loadtest.json`, polls state,
   fires one submit salvo per question, prints the latency matrix.
 
@@ -63,7 +63,7 @@ env/bin/gunicorn --chdir sites -b 127.0.0.1:8001 \
 
 - `-k gthread` — threaded workers, no extra dep (gevent not required).
 - `--backlog 4096` — excess connections queue instead of being reset.
-- Frappe resolves the site from the `Host` header, so hitting `quizzly.localhost:8001`
+- Frappe resolves the site from the `Host` header, so hitting `trivia-tap.localhost:8001`
   serves the same site.
 
 To push past 48 concurrent DB handlers, raise the DB cap (needs MariaDB root):
@@ -119,13 +119,13 @@ Tuning for a real load test:
 
 ```bash
 # 1. arm the game (creates session + participants, writes /tmp/trivia_tap_loadtest.json)
-QZ_LOADTEST_PLAYERS=1000 bench --site <site> console < scripts/loadtest_setup.py
+TT_LOADTEST_PLAYERS=1000 bench --site <site> console < scripts/loadtest_setup.py
 
 # 2. start the ticker. local: foreground loop. production: enqueue on the long worker (see Option B step 3)
 echo 'from trivia_tap import engine; engine.run_ticker()' | bench --site <site> console &
 
 # 3. run the driver
-QZ_LOADTEST_ORIGIN="https://quiz.example.com" env/bin/python scripts/loadtest.py
+TT_LOADTEST_ORIGIN="https://quiz.example.com" env/bin/python scripts/loadtest.py
 ```
 
 ## Reading the output
@@ -159,11 +159,11 @@ participants + session) automatically. For the manual path, do it yourself:
 # stop the ticker (clears active set so run_ticker's loop exits), then delete test data
 bench --site <site> console <<'PY'
 import frappe
-frappe.cache.delete("qz:active_sessions")
+frappe.cache.delete("tt:active_sessions")
 s = "<session-name>"   # from the "armed session=..." line
-frappe.db.delete("QZ Answer", {"session": s})
-frappe.db.delete("QZ Participant", {"session": s})
-frappe.delete_doc("QZ Session", s, force=True, ignore_permissions=True)
+frappe.db.delete("TT Answer", {"session": s})
+frappe.db.delete("TT Participant", {"session": s})
+frappe.delete_doc("TT Session", s, force=True, ignore_permissions=True)
 frappe.db.commit()
 PY
 ```

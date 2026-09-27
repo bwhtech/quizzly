@@ -17,11 +17,11 @@ NICKNAME_MAX_LENGTH = 20
 
 @frappe.whitelist()
 def create_session(quiz: str) -> dict:
-	quiz_doc = frappe.get_doc("QZ Quiz", quiz)
+	quiz_doc = frappe.get_doc("TT Quiz", quiz)
 	quiz_doc.check_permission("read")
 	session = frappe.get_doc(
 		{
-			"doctype": "QZ Session",
+			"doctype": "TT Session",
 			"quiz": quiz_doc.name,
 			"host": frappe.session.user,
 			"game_pin": generate_game_pin(),
@@ -44,7 +44,7 @@ def unlock_lobby(session: str) -> dict:
 @frappe.whitelist()
 def kick_participant(session: str, participant: str) -> None:
 	session_doc = get_host_session(session)
-	participant_doc = frappe.get_doc("QZ Participant", participant)
+	participant_doc = frappe.get_doc("TT Participant", participant)
 	if participant_doc.session != session_doc.name:
 		frappe.throw(_("Participant does not belong to this session"))
 	participant_doc.kicked = 1
@@ -88,7 +88,7 @@ def get_host_state(session: str | None = None) -> dict:
 
 	question = get_question_row(session_doc, state["question_row"])
 	answers = frappe.get_all(
-		"QZ Answer",
+		"TT Answer",
 		filters={"session": session_doc.name, "question_row": question.name},
 		fields=["selected_option"],
 	)
@@ -123,7 +123,7 @@ def start_session(session: str) -> dict:
 	session_doc = get_host_session(session)
 	if session_doc.status != "Lobby":
 		frappe.throw(_("Session has already started"))
-	if not frappe.db.exists("QZ Participant", {"session": session_doc.name, "kicked": 0}):
+	if not frappe.db.exists("TT Participant", {"session": session_doc.name, "kicked": 0}):
 		frappe.throw(_("No participants have joined yet"))
 	session_doc.status = "Active"
 	session_doc.started_at = now_datetime()
@@ -167,10 +167,10 @@ def end_session(session: str) -> dict:
 
 @frappe.whitelist()
 def list_quizzes() -> list[dict]:
-	quizzes = frappe.get_list("QZ Quiz", fields=["name", "title"], order_by="modified desc")
+	quizzes = frappe.get_list("TT Quiz", fields=["name", "title"], order_by="modified desc")
 	for quiz in quizzes:
 		# ponytail: one count per quiz; group them if a host ever owns hundreds
-		quiz["question_count"] = frappe.db.count("QZ Question", {"parent": quiz.name})
+		quiz["question_count"] = frappe.db.count("TT Question", {"parent": quiz.name})
 	return quizzes
 
 
@@ -188,13 +188,13 @@ def join_session(pin: str, nickname: str, avatar: str | None = None) -> dict:
 	nickname = strip_html_tags(nickname or "").strip()[:NICKNAME_MAX_LENGTH]
 	if is_profane(nickname):
 		frappe.throw(_("Pick a nickname everyone can see on the big screen"))
-	if frappe.db.exists("QZ Participant", {"session": session.name, "nickname": nickname, "kicked": 0}):
+	if frappe.db.exists("TT Participant", {"session": session.name, "nickname": nickname, "kicked": 0}):
 		frappe.throw(_("That nickname is taken, pick another"), frappe.DuplicateEntryError)
 
 	token = secrets.token_hex(32)
 	participant = frappe.get_doc(
 		{
-			"doctype": "QZ Participant",
+			"doctype": "TT Participant",
 			"session": session.name,
 			"nickname": nickname,
 			"avatar": avatar,
@@ -238,7 +238,7 @@ def submit_answer(pin: str, token: str, question_row: str, selected_option: str)
 	try:
 		frappe.get_doc(
 			{
-				"doctype": "QZ Answer",
+				"doctype": "TT Answer",
 				"session": session.name,
 				"participant": participant.name,
 				"question_row": question_row,
@@ -301,7 +301,7 @@ def get_result(pin: str, token: str, question_row: str) -> dict:
 	session = get_session_by_pin(pin)
 	participant = get_participant_by_token(session, token)
 	answer = frappe.db.get_value(
-		"QZ Answer",
+		"TT Answer",
 		{"session": session.name, "participant": participant.name, "question_row": question_row},
 		["is_correct", "points", "selected_option"],
 		as_dict=True,
@@ -325,12 +325,12 @@ def leave_session(pin: str, token: str) -> None:
 	participant = get_participant_by_token(session, token)
 	# ponytail: leave only matters in the lobby; mid-game the row must survive for scores
 	if session.status == "Lobby":
-		frappe.delete_doc("QZ Participant", participant.name, ignore_permissions=True, force=True)
+		frappe.delete_doc("TT Participant", participant.name, ignore_permissions=True, force=True)
 		publish_lobby_update(session)
 
 
 def get_host_session(session: str) -> Document:
-	doc = frappe.get_doc("QZ Session", session)
+	doc = frappe.get_doc("TT Session", session)
 	if doc.host != frappe.session.user:
 		frappe.throw(_("You are not the host of this session"), frappe.PermissionError)
 	return doc
@@ -338,13 +338,13 @@ def get_host_session(session: str) -> Document:
 
 def get_live_host_session() -> Document | None:
 	names = frappe.get_all(
-		"QZ Session",
+		"TT Session",
 		filters={"host": frappe.session.user, "status": ("in", ("Lobby", "Active"))},
 		pluck="name",
 		order_by="creation desc",
 	)
 	for name in names:
-		doc = frappe.get_doc("QZ Session", name)
+		doc = frappe.get_doc("TT Session", name)
 		# games left Active by a dead worker would otherwise hide the quiz picker forever
 		if engine.is_abandoned(doc):
 			engine.finish_session(doc)
@@ -357,21 +357,21 @@ def get_session_by_pin(pin: str) -> Document:
 	pin = (pin or "").strip()
 	# Ended is allowed so a player who reloads on the podium still gets it back
 	name = pin and frappe.db.get_value(
-		"QZ Session", {"game_pin": pin, "status": ("in", ("Lobby", "Active", "Ended"))}
+		"TT Session", {"game_pin": pin, "status": ("in", ("Lobby", "Active", "Ended"))}
 	)
 	if not name:
 		frappe.throw(_("Invalid game PIN"), frappe.DoesNotExistError)
-	return frappe.get_doc("QZ Session", name)
+	return frappe.get_doc("TT Session", name)
 
 
 def get_participant_by_token(session: Document, token: str) -> Document:
 	name = frappe.db.get_value(
-		"QZ Participant",
+		"TT Participant",
 		{"session": session.name, "token_hash": hash_token(token or ""), "kicked": 0},
 	)
 	if not name:
 		frappe.throw(_("Not a participant of this session"), frappe.PermissionError)
-	return frappe.get_doc("QZ Participant", name)
+	return frappe.get_doc("TT Participant", name)
 
 
 def get_leaderboard(session: str) -> list[dict]:
@@ -385,14 +385,14 @@ def get_leaderboard(session: str) -> list[dict]:
 
 def get_rank(session: str, participant: Document) -> int:
 	ahead = frappe.db.count(
-		"QZ Participant", {"session": session, "kicked": 0, "score": (">", participant.score)}
+		"TT Participant", {"session": session, "kicked": 0, "score": (">", participant.score)}
 	)
 	return ahead + 1
 
 
 def get_lobby_state(session: Document) -> dict:
 	participants = frappe.get_all(
-		"QZ Participant",
+		"TT Participant",
 		filters={"session": session.name, "kicked": 0},
 		fields=["name", "nickname", "avatar"],
 		order_by="joined_at asc",
@@ -431,6 +431,6 @@ def generate_game_pin() -> str:
 	# ponytail: pins stay unique forever (DB unique column); revisit if sessions ever near 1M
 	for _attempt in range(20):
 		pin = f"{secrets.randbelow(1_000_000):06d}"
-		if not frappe.db.exists("QZ Session", {"game_pin": pin}):
+		if not frappe.db.exists("TT Session", {"game_pin": pin}):
 			return pin
 	frappe.throw(_("Could not allocate a game PIN, please retry"))

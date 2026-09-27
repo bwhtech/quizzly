@@ -42,7 +42,7 @@ class GameTestCase(IntegrationTestCase):
 		frappe.set_user("Administrator")
 		self.quiz = frappe.get_doc(
 			{
-				"doctype": "QZ Quiz",
+				"doctype": "TT Quiz",
 				"title": "Engine Quiz",
 				"default_time_limit": 20,
 				"questions": [
@@ -71,10 +71,10 @@ class GameTestCase(IntegrationTestCase):
 		created = create_session(self.quiz.name)
 		self.session = created["session"]
 		self.pin = created["game_pin"]
-		self.session_doc = frappe.get_doc("QZ Session", self.session)
+		self.session_doc = frappe.get_doc("TT Session", self.session)
 		self.alice = join_session(self.pin, "alice")
 		self.bob = join_session(self.pin, "bob")
-		self.questions = frappe.get_doc("QZ Quiz", self.quiz.name).questions
+		self.questions = frappe.get_doc("TT Quiz", self.quiz.name).questions
 
 	def tearDown(self):
 		engine.clear_state(self.session)
@@ -84,16 +84,16 @@ class GameTestCase(IntegrationTestCase):
 		# engine steps commit mid-test, so the framework rollback alone would leave this
 		# quiz and session behind on the site and pollute the host's quiz picker
 		frappe.db.rollback()
-		for doctype in ("QZ Answer", "QZ Participant"):
+		for doctype in ("TT Answer", "TT Participant"):
 			for name in frappe.get_all(doctype, filters={"session": self.session}, pluck="name"):
 				frappe.delete_doc(doctype, name, force=True)
-		frappe.delete_doc("QZ Session", self.session, force=True)
-		frappe.delete_doc("QZ Quiz", self.quiz.name, force=True)
+		frappe.delete_doc("TT Session", self.session, force=True)
+		frappe.delete_doc("TT Quiz", self.quiz.name, force=True)
 		frappe.db.commit()
 		super().tearDown()
 
 	def activate(self):
-		frappe.db.set_value("QZ Session", self.session, "status", "Active")
+		frappe.db.set_value("TT Session", self.session, "status", "Active")
 		self.session_doc.reload()
 
 	def record_events(self, events):
@@ -131,7 +131,7 @@ class TestSubmitGauntlet(GameTestCase):
 		result = submit_answer(self.pin, self.alice["participant_token"], question.name, "2")
 		self.assertEqual(result, {"ok": True})
 		answer = frappe.get_doc(
-			"QZ Answer", {"participant": self.alice["participant"], "question_row": question.name}
+			"TT Answer", {"participant": self.alice["participant"], "question_row": question.name}
 		)
 		self.assertEqual(answer.selected_option, "2")
 		self.assertGreaterEqual(answer.response_ms, 0)
@@ -268,8 +268,8 @@ class TestGameLoop(GameTestCase):
 		self.assertEqual(podium["type"], "podium")
 		self.assertEqual([p["nickname"] for p in podium["leaderboard"]], ["alice", "bob"])
 
-		alice = frappe.get_doc("QZ Participant", self.alice["participant"])
-		bob = frappe.get_doc("QZ Participant", self.bob["participant"])
+		alice = frappe.get_doc("TT Participant", self.alice["participant"])
+		bob = frappe.get_doc("TT Participant", self.bob["participant"])
 		# q1 correct (1x) + q2 correct (2x, streak 2): score > 1500, streak 2
 		self.assertGreater(alice.score, 1500)
 		self.assertEqual(alice.streak, 2)
@@ -277,7 +277,7 @@ class TestGameLoop(GameTestCase):
 		self.assertEqual(bob.score, 0)
 		self.assertEqual(bob.streak, 0)
 		self.assertEqual(bob.rank, 2)
-		self.assertEqual(frappe.db.get_value("QZ Session", self.session, "status"), "Ended")
+		self.assertEqual(frappe.db.get_value("TT Session", self.session, "status"), "Ended")
 
 	def test_wrong_answer_scores_zero_and_resets_streak(self):
 		self.activate()
@@ -285,11 +285,11 @@ class TestGameLoop(GameTestCase):
 		submit_answer(self.pin, self.bob["participant_token"], question.name, "3")
 		with patch("frappe.publish_realtime"), patch("frappe.db.commit"):
 			engine.close_question(self.session_doc, question, 0, 2)
-		bob = frappe.get_doc("QZ Participant", self.bob["participant"])
+		bob = frappe.get_doc("TT Participant", self.bob["participant"])
 		self.assertEqual(bob.score, 0)
 		self.assertEqual(bob.streak, 0)
 		answer = frappe.get_doc(
-			"QZ Answer", {"participant": self.bob["participant"], "question_row": question.name}
+			"TT Answer", {"participant": self.bob["participant"], "question_row": question.name}
 		)
 		self.assertEqual(answer.is_correct, 0)
 		self.assertEqual(answer.points, 0)
@@ -306,7 +306,7 @@ class TestGameLoop(GameTestCase):
 
 	def test_stats_holds_for_host_when_auto_advance_off(self):
 		self.activate()
-		frappe.db.set_value("QZ Session", self.session, "auto_advance", 0)
+		frappe.db.set_value("TT Session", self.session, "auto_advance", 0)
 		question = self.open_question()
 		with patch("frappe.publish_realtime"), patch("frappe.db.commit"):
 			engine.close_question(self.session_doc, question, 0, len(self.questions))
@@ -339,24 +339,24 @@ class TestGameLoop(GameTestCase):
 
 	def test_last_question_skips_the_standings_for_the_podium(self):
 		self.activate()
-		frappe.db.set_value("QZ Session", self.session, "auto_advance", 0)
+		frappe.db.set_value("TT Session", self.session, "auto_advance", 0)
 		last = len(self.questions) - 1
 		question = self.open_question(index=last)
 		with patch("frappe.publish_realtime"), patch("frappe.db.commit"):
 			engine.close_question(self.session_doc, question, last, len(self.questions))
 			engine.advance_session(self.session_doc, engine.get_state(self.session), "advance")
-		self.assertEqual(frappe.db.get_value("QZ Session", self.session, "status"), "Ended")
+		self.assertEqual(frappe.db.get_value("TT Session", self.session, "status"), "Ended")
 
 	def test_advance_control_on_last_question_finishes(self):
 		self.activate()
-		frappe.db.set_value("QZ Session", self.session, "auto_advance", 0)
+		frappe.db.set_value("TT Session", self.session, "auto_advance", 0)
 		last = len(self.questions) - 1
 		question = self.open_question(index=last)
 		with patch("frappe.publish_realtime"), patch("frappe.db.commit"):
 			engine.close_question(self.session_doc, question, last, len(self.questions))
 			engine.advance_session(self.session_doc, engine.get_state(self.session), "advance")
 		self.assertIsNone(engine.get_state(self.session))
-		self.assertEqual(frappe.db.get_value("QZ Session", self.session, "status"), "Ended")
+		self.assertEqual(frappe.db.get_value("TT Session", self.session, "status"), "Ended")
 
 	def test_finish_session_is_idempotent(self):
 		"""Two host reads can both settle an abandoned game; ranks/podium must fire once."""
@@ -372,7 +372,7 @@ class TestGameLoop(GameTestCase):
 			engine.finish_session(self.session_doc)
 
 		self.assertEqual(len(podiums), 1)
-		self.assertEqual(frappe.db.get_value("QZ Session", self.session, "status"), "Ended")
+		self.assertEqual(frappe.db.get_value("TT Session", self.session, "status"), "Ended")
 
 	def test_ticker_survives_bad_session(self):
 		"""A session that throws every pass must not stall the other live games."""
@@ -406,21 +406,21 @@ class TestGameLoop(GameTestCase):
 			engine.run_ticker()
 
 		self.assertEqual(events[-1]["type"], "podium")
-		self.assertEqual(frappe.db.get_value("QZ Session", self.session, "status"), "Ended")
+		self.assertEqual(frappe.db.get_value("TT Session", self.session, "status"), "Ended")
 
 	def test_end_session_from_lobby_cancels(self):
 		end_session(self.session)
-		self.assertEqual(frappe.db.get_value("QZ Session", self.session, "status"), "Cancelled")
+		self.assertEqual(frappe.db.get_value("TT Session", self.session, "status"), "Cancelled")
 
 
 class TestExplanationScreen(GameTestCase):
 	def enable_explanation(self, text="Canberra it is.", image=None):
-		quiz = frappe.get_doc("QZ Quiz", self.quiz.name)
+		quiz = frappe.get_doc("TT Quiz", self.quiz.name)
 		quiz.show_explanation = 1
 		quiz.questions[0].explanation = text
 		quiz.questions[0].explanation_image = image
 		quiz.save()
-		self.questions = frappe.get_doc("QZ Quiz", self.quiz.name).questions
+		self.questions = frappe.get_doc("TT Quiz", self.quiz.name).questions
 
 	def test_explanation_holds_the_scoreboard_back(self):
 		self.activate()
@@ -441,7 +441,7 @@ class TestExplanationScreen(GameTestCase):
 				# scores settle at close, so a player's own result is ready to read here
 				self.assertEqual(
 					frappe.db.get_value(
-						"QZ Answer",
+						"TT Answer",
 						{"participant": self.alice["participant"], "question_row": question.name},
 						"is_correct",
 					),
@@ -456,7 +456,7 @@ class TestExplanationScreen(GameTestCase):
 	def test_explanation_after_stats_reverses_the_two_screens(self):
 		self.activate()
 		self.enable_explanation()
-		frappe.db.set_value("QZ Quiz", self.quiz.name, "explanation_position", "After Stats")
+		frappe.db.set_value("TT Quiz", self.quiz.name, "explanation_position", "After Stats")
 		question = self.open_question()
 		events = []
 
@@ -487,8 +487,8 @@ class TestExplanationScreen(GameTestCase):
 	def test_quiz_sets_how_long_the_explanation_stays_up(self):
 		self.activate()
 		self.enable_explanation()
-		frappe.db.set_value("QZ Quiz", self.quiz.name, "explanation_time_limit", 25)
-		frappe.db.set_value("QZ Session", self.session, "auto_advance", 1)
+		frappe.db.set_value("TT Quiz", self.quiz.name, "explanation_time_limit", 25)
+		frappe.db.set_value("TT Session", self.session, "auto_advance", 1)
 		question = self.open_question()
 		with patch("frappe.publish_realtime"), patch("frappe.db.commit"):
 			engine.close_question(self.session_doc, question, 0, len(self.questions))
@@ -508,7 +508,7 @@ class TestExplanationScreen(GameTestCase):
 	def test_no_explanation_phase_when_quiz_toggle_is_off(self):
 		self.activate()
 		self.enable_explanation()
-		frappe.db.set_value("QZ Quiz", self.quiz.name, "show_explanation", 0)
+		frappe.db.set_value("TT Quiz", self.quiz.name, "show_explanation", 0)
 		question = self.open_question()
 		with patch("frappe.publish_realtime"), patch("frappe.db.commit"):
 			engine.close_question(self.session_doc, question, 0, len(self.questions))

@@ -6,12 +6,14 @@
  "engine": "InnoDB",
  "field_order": [
   "session",
-  "participant",
-  "question_row",
-  "selected_option",
-  "is_correct",
-  "response_ms",
-  "points"
+  "nickname",
+  "avatar",
+  "token_hash",
+  "score",
+  "streak",
+  "rank",
+  "kicked",
+  "joined_at"
  ],
  "fields": [
   {
@@ -19,54 +21,64 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Session",
-   "options": "QZ Session",
+   "options": "TT Session",
    "reqd": 1
   },
   {
-   "fieldname": "participant",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Participant",
-   "options": "QZ Participant",
-   "reqd": 1
-  },
-  {
-   "description": "Child row name of QZ Question",
-   "fieldname": "question_row",
+   "fieldname": "nickname",
    "fieldtype": "Data",
-   "label": "Question Row",
-   "reqd": 1,
+   "in_list_view": 1,
+   "label": "Nickname",
+   "reqd": 1
+  },
+  {
+   "description": "avatar id from the active pack in avatar_packs/",
+   "fieldname": "avatar",
+   "fieldtype": "Data",
+   "label": "Avatar"
+  },
+  {
+   "description": "sha256 of the participant token; the raw token is never stored",
+   "fieldname": "token_hash",
+   "fieldtype": "Data",
+   "label": "Token Hash",
    "search_index": 1
   },
   {
-   "fieldname": "selected_option",
-   "fieldtype": "Select",
-   "label": "Selected Option",
-   "options": "1\n2\n3\n4"
+   "default": "0",
+   "fieldname": "score",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Score"
   },
   {
    "default": "0",
-   "fieldname": "is_correct",
+   "fieldname": "streak",
+   "fieldtype": "Int",
+   "label": "Streak"
+  },
+  {
+   "fieldname": "rank",
+   "fieldtype": "Int",
+   "label": "Rank"
+  },
+  {
+   "default": "0",
+   "fieldname": "kicked",
    "fieldtype": "Check",
-   "label": "Is Correct"
+   "label": "Kicked"
   },
   {
-   "fieldname": "response_ms",
-   "fieldtype": "Int",
-   "label": "Response (ms)"
-  },
-  {
-   "default": "0",
-   "fieldname": "points",
-   "fieldtype": "Int",
-   "label": "Points"
+   "fieldname": "joined_at",
+   "fieldtype": "Datetime",
+   "label": "Joined At"
   }
  ],
  "links": [],
- "modified": "2026-07-19 22:20:49.072324",
+ "modified": "2026-07-19 22:20:48.904164",
  "modified_by": "Administrator",
  "module": "TriviaTap",
- "name": "QZ Answer",
+ "name": "TT Participant",
  "naming_rule": "Random",
  "owner": "Administrator",
  "permissions": [

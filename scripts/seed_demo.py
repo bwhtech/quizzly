@@ -1,5 +1,5 @@
 # Demo content for README screenshots. Throwaway: run it, take the pictures.
-# Usage: bench --site quizzly.localhost console < scripts/seed_demo.py
+# Usage: bench --site trivia-tap.localhost console < scripts/seed_demo.py
 
 import frappe
 
@@ -48,11 +48,11 @@ QUESTIONS = [
 	},
 ]
 
-frappe.db.delete("QZ Quiz", {"title": TITLE})
+frappe.db.delete("TT Quiz", {"title": TITLE})
 
 quiz = frappe.get_doc(
 	{
-		"doctype": "QZ Quiz",
+		"doctype": "TT Quiz",
 		"title": TITLE,
 		"description": "A five-question warm-up round. Fast fingers win.",
 		"default_time_limit": 20,

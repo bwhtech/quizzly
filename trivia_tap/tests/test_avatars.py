@@ -12,7 +12,7 @@ class TestAvatars(IntegrationTestCase):
 		frappe.set_user("Administrator")
 		self.quiz = frappe.get_doc(
 			{
-				"doctype": "QZ Quiz",
+				"doctype": "TT Quiz",
 				"title": "Avatar Quiz",
 				"questions": [
 					{
@@ -41,7 +41,7 @@ class TestAvatars(IntegrationTestCase):
 		chosen = get_active_pack()["avatars"][3]
 		result = self.join_as_guest("alice", chosen)
 		self.assertEqual(result["avatar"], chosen)
-		self.assertEqual(frappe.db.get_value("QZ Participant", result["participant"], "avatar"), chosen)
+		self.assertEqual(frappe.db.get_value("TT Participant", result["participant"], "avatar"), chosen)
 
 	def test_unknown_avatar_rejected(self):
 		with self.assertRaises(frappe.ValidationError):

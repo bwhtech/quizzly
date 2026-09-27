@@ -28,7 +28,7 @@ echo "bench=$BENCH_DIR site=$SITE origin=$ORIGIN players=$PLAYERS"
 echo
 
 echo "==> arming session ($PLAYERS participants)"
-QZ_LOADTEST_PLAYERS="$PLAYERS" bench --site "$SITE" console < apps/trivia_tap/scripts/loadtest_setup.py \
+TT_LOADTEST_PLAYERS="$PLAYERS" bench --site "$SITE" console < apps/trivia_tap/scripts/loadtest_setup.py \
 	| grep "armed session" || { echo "setup failed (is 'General Knowledge' seeded?)"; exit 1; }
 
 # Drive the ticker in the foreground, not via the RQ worker. loadtest_setup.py arms
@@ -41,7 +41,7 @@ echo 'from trivia_tap import engine; engine.run_ticker()' | bench --site "$SITE"
 TICKER_PID=$!
 
 echo "==> driving submits"
-QZ_LOADTEST_ORIGIN="$ORIGIN" env/bin/python apps/trivia_tap/scripts/loadtest.py
+TT_LOADTEST_ORIGIN="$ORIGIN" env/bin/python apps/trivia_tap/scripts/loadtest.py
 rc=$?
 
 echo
@@ -50,11 +50,11 @@ SESSION="$(env/bin/python -c "import json; print(json.load(open('$STATE_FILE'))[
 kill "$TICKER_PID" 2>/dev/null || true
 bench --site "$SITE" console <<PY > /dev/null
 import frappe
-frappe.cache.delete("qz:active_sessions")
+frappe.cache.delete("tt:active_sessions")
 s = "$SESSION"
-frappe.db.delete("QZ Answer", {"session": s})
-frappe.db.delete("QZ Participant", {"session": s})
-frappe.delete_doc("QZ Session", s, force=True, ignore_permissions=True)
+frappe.db.delete("TT Answer", {"session": s})
+frappe.db.delete("TT Participant", {"session": s})
+frappe.delete_doc("TT Session", s, force=True, ignore_permissions=True)
 frappe.db.commit()
 print("removed test session", s)
 PY

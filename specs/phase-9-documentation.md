@@ -3,11 +3,11 @@
 ## Goal
 
 The repo has a build plan (`plan.md`), a phase log (`progress.md`), and 13
-specs. What it does not have is anything that tells a stranger what Quizzly is
+specs. What it does not have is anything that tells a stranger what TriviaTap is
 in thirty seconds. `README.md` is still the app-scaffold default: four lines
 about installation and pre-commit, no product description, no picture.
 
-Quizzly is a visual product. Two screens, live, in colour. A README without
+TriviaTap is a visual product. Two screens, live, in colour. A README without
 screenshots undersells it more than it would undersell a library.
 
 So: rewrite `README.md` as the front door, and capture a small set of real
@@ -18,7 +18,7 @@ screenshots from a real running game to go in it.
 - **No docs site.** No mkdocs, no docusaurus, no `docs/` content tree beyond
   the images folder. One README is the whole documentation surface until
   someone asks a question it cannot answer.
-- **No API reference.** The whitelisted APIs in `quizzly/api.py` are internal
+- **No API reference.** The whitelisted APIs in `trivia_tap/api.py` are internal
   to the SPA, not a public contract. Documenting them now freezes a moving
   target.
 - **No architecture doc.** `plan.md` section 2 already carries the
@@ -26,7 +26,7 @@ screenshots from a real running game to go in it.
   duplicate them.
 - **No CONTRIBUTING.md.** The pre-commit section in the README covers it.
 - **No mock or Figma screenshots.** Everything shown is a real screen from a
-  real session against `quizzly.localhost`, or it does not ship.
+  real session against `trivia-tap.localhost`, or it does not ship.
 - **No video / GIF.** A hero PNG plus a collapsed gallery. Motion capture is a
   maintenance burden and bloats the repo.
 
@@ -52,7 +52,7 @@ Anything heavier gets re-exported, not committed.
 
 ### How they are captured
 
-Use the `/agent-browser` skill, headless, against `quizzly.localhost:8000`,
+Use the `/agent-browser` skill, headless, against `trivia-tap.localhost:8000`,
 logged in as `Administrator` / `admin` for host shots. Two browser contexts:
 host and player, same as the phase 8 harness.
 
@@ -119,9 +119,9 @@ manual.
    linked.
 6. **Development setup**: bench install steps (keep the existing block, it is
    correct), plus `yarn dev` for the frontend and the note that the SPA is
-   served at `/quizzly`.
-7. **Testing**: how to run `bench --site quizzly.localhost run-tests --app
-   quizzly`, and the `allow_tests` config it needs.
+   served at `/trivia-tap`.
+7. **Testing**: how to run `bench --site trivia-tap.localhost run-tests --app
+   trivia_tap`, and the `allow_tests` config it needs.
 8. **Contributing**: the existing pre-commit block, unchanged.
 9. **License**: MIT, unchanged.
 

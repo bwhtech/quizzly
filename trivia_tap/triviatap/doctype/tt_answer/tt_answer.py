@@ -2,7 +2,7 @@ import frappe
 from frappe.model.document import Document
 
 
-class QZAnswer(Document):
+class TTAnswer(Document):
 	# begin: auto-generated types
 	# This code is auto-generated. Do not modify anything in this block.
 
@@ -23,4 +23,4 @@ class QZAnswer(Document):
 
 def on_doctype_update():
 	# Duplicate submits die at the DB level regardless of race conditions
-	frappe.db.add_unique("QZ Answer", ["participant", "question_row"])
+	frappe.db.add_unique("TT Answer", ["participant", "question_row"])

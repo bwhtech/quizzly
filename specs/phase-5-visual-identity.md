@@ -2,7 +2,7 @@
 
 Everything up to Phase 4 shipped on borrowed shapes: red/blue/yellow/green
 triangle, diamond, circle, square, on frappe-ui's default light chrome. It
-worked, and it was Kahoot's design. This phase gives Quizzly a look of its own
+worked, and it was Kahoot's design. This phase gives TriviaTap a look of its own
 without touching the engine: no scoring, timing, or payload contract changes.
 
 ## Goal

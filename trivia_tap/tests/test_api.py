@@ -16,7 +16,7 @@ class TestLobbyFlow(IntegrationTestCase):
 		frappe.set_user("Administrator")
 		self.quiz = frappe.get_doc(
 			{
-				"doctype": "QZ Quiz",
+				"doctype": "TT Quiz",
 				"title": "Test Quiz",
 				"questions": [
 					{
@@ -46,7 +46,7 @@ class TestLobbyFlow(IntegrationTestCase):
 			frappe.set_user("Administrator")
 
 	def test_session_created_with_pin(self):
-		session = frappe.get_doc("QZ Session", self.session)
+		session = frappe.get_doc("TT Session", self.session)
 		self.assertEqual(session.status, "Lobby")
 		self.assertEqual(session.host, "Administrator")
 		self.assertRegex(session.game_pin, r"^\d{6}$")
@@ -56,7 +56,7 @@ class TestLobbyFlow(IntegrationTestCase):
 		self.assertEqual(len(result["participant_token"]), 64)
 		self.assertEqual(result["nickname"], "alice")
 		self.assertEqual([p.nickname for p in result["participants"]], ["alice"])
-		stored = frappe.db.get_value("QZ Participant", result["participant"], "token_hash")
+		stored = frappe.db.get_value("TT Participant", result["participant"], "token_hash")
 		self.assertNotEqual(stored, result["participant_token"])
 
 	def test_wrong_pin_rejected(self):
@@ -94,7 +94,7 @@ class TestLobbyFlow(IntegrationTestCase):
 			leave_session(self.pin, joined["participant_token"])
 		finally:
 			frappe.set_user("Administrator")
-		self.assertFalse(frappe.db.exists("QZ Participant", joined["participant"]))
+		self.assertFalse(frappe.db.exists("TT Participant", joined["participant"]))
 
 	def test_non_host_cannot_control_session(self):
 		frappe.set_user("Guest")

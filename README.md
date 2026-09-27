@@ -34,7 +34,9 @@ the game.
 
 **Between questions**
 
-<img alt="Correct answer revealed with answer distribution and top five leaderboard" src="docs/images/host-leaderboard.png" />
+<img alt="Correct answer revealed with the answer distribution" src="docs/images/host-stats.png" />
+
+<img alt="Scoreboard with the top five after the question" src="docs/images/host-leaderboard.png" />
 
 **Final results**
 
@@ -79,7 +81,7 @@ the game.
 2. In another terminal, from your bench directory:
 
 ```bash
-bench get-app https://github.com/gajjug004/quizzly --branch develop
+bench get-app https://github.com/bwhtech/trivia_tap --branch develop
 bench --site your-site.localhost install-app trivia_tap
 ```
 

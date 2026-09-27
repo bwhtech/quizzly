@@ -4,7 +4,7 @@ from frappe.model.document import Document
 from frappe.utils import cint
 
 
-class QZQuiz(Document):
+class TTQuiz(Document):
 	# begin: auto-generated types
 	# This code is auto-generated. Do not modify anything in this block.
 
@@ -13,11 +13,11 @@ class QZQuiz(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		from trivia_tap.triviatap.doctype.qz_question.qz_question import QZQuestion
+		from trivia_tap.triviatap.doctype.tt_question.tt_question import TTQuestion
 
 		default_time_limit: DF.Int
 		description: DF.SmallText | None
-		questions: DF.Table[QZQuestion]
+		questions: DF.Table[TTQuestion]
 		title: DF.Data
 	# end: auto-generated types
 

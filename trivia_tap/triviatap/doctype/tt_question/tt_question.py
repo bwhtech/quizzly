@@ -1,7 +1,7 @@
 from frappe.model.document import Document
 
 
-class QZQuestion(Document):
+class TTQuestion(Document):
 	# begin: auto-generated types
 	# This code is auto-generated. Do not modify anything in this block.
 

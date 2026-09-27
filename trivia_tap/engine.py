@@ -24,7 +24,7 @@ TICK_SECONDS = 0.5
 ANSWER_COUNT_THROTTLE = 0.3
 STATE_TTL_MARGIN = 30
 STREAK_CALLOUT_MIN = 3
-ACTIVE_SESSIONS_KEY = "qz:active_sessions"
+ACTIVE_SESSIONS_KEY = "tt:active_sessions"
 # ponytail: one shared ticker for all games; 6h covers any single game, re-enqueue on timeout is a Phase 2 scale concern
 TICKER_TIMEOUT = 21600
 
@@ -41,7 +41,7 @@ def enqueue_game_loop(session_doc) -> None:
 		"trivia_tap.engine.run_ticker",
 		queue="long",
 		timeout=TICKER_TIMEOUT,
-		job_id="qz_ticker",
+		job_id="tt_ticker",
 		deduplicate=True,
 		enqueue_after_commit=True,
 	)
@@ -59,7 +59,7 @@ def run_ticker() -> None:
 			break
 		prune_ticker_caches(sessions, answer_count_state, pin_cache)
 		for session in sessions:
-			frappe.db.savepoint("qz_tick")
+			frappe.db.savepoint("tt_tick")
 			try:
 				state = get_state(session)
 				if not state:
@@ -67,14 +67,14 @@ def run_ticker() -> None:
 					continue
 				control = pop_control(session, ("skip", "advance", "end"))
 				if control or time.time() >= state["next_ts"]:
-					advance_session(frappe.get_doc("QZ Session", session), state, control)
+					advance_session(frappe.get_doc("TT Session", session), state, control)
 				else:
 					maybe_push_answer_count(session, state, answer_count_state, pin_cache)
 				frappe.db.commit()
 			except Exception:
 				# one bad session must not stall every other live game
-				frappe.db.rollback(save_point="qz_tick")
-				frappe.log_error(title=f"qz_ticker session {session}")
+				frappe.db.rollback(save_point="tt_tick")
+				frappe.log_error(title=f"tt_ticker session {session}")
 		time.sleep(TICK_SECONDS)
 
 
@@ -97,9 +97,9 @@ def maybe_push_answer_count(session: str, state: dict, throttle_state: dict, pin
 	throttle_state[session] = (question_row, count, now)
 	pin = pin_cache.get(session)
 	if pin is None:
-		pin = frappe.db.get_value("QZ Session", session, "game_pin")
+		pin = frappe.db.get_value("TT Session", session, "game_pin")
 		pin_cache[session] = pin
-	room = f"qz_session_{pin}"
+	room = f"tt_session_{pin}"
 	frappe.publish_realtime(
 		event=room,
 		message={"type": "answer_count", "question_row": question_row, "count": count},
@@ -206,7 +206,7 @@ def open_question(session_doc, question, index: int, total: int) -> None:
 		},
 		ttl=window + STATE_TTL_MARGIN,
 	)
-	frappe.db.set_value("QZ Session", session_doc.name, "current_question", index)
+	frappe.db.set_value("TT Session", session_doc.name, "current_question", index)
 	publish_session_event(session_doc, question_payload(session_doc, question, index, total, deadline_ts))
 
 
@@ -215,7 +215,7 @@ def close_question(session_doc, question, index: int, total: int) -> None:
 	window_ms = state.get("window_ms") or question_window(question, session_doc) * 1000
 	participants = get_live_participants(session_doc.name)
 	answers = frappe.get_all(
-		"QZ Answer",
+		"TT Answer",
 		filters={"session": session_doc.name, "question_row": question.name},
 		fields=["name", "participant", "selected_option", "response_ms"],
 	)
@@ -247,8 +247,8 @@ def close_question(session_doc, question, index: int, total: int) -> None:
 		answer_updates[answer.name] = {"is_correct": int(is_correct), "points": points}
 		participant_updates[participant.name] = {"score": participant.score, "streak": participant.streak}
 
-	frappe.db.bulk_update("QZ Answer", answer_updates)
-	frappe.db.bulk_update("QZ Participant", participant_updates)
+	frappe.db.bulk_update("TT Answer", answer_updates)
+	frappe.db.bulk_update("TT Participant", participant_updates)
 
 	streaks = [
 		{"nickname": p.nickname, "avatar": p.avatar, "streak": p.streak}
@@ -373,7 +373,7 @@ def carry_over(state: dict) -> dict:
 
 def hold_seconds(session_doc, timed: int) -> int:
 	"""With auto-advance off the host drives every step, so the phase waits them out."""
-	auto_advance = frappe.db.get_value("QZ Session", session_doc.name, "auto_advance")
+	auto_advance = frappe.db.get_value("TT Session", session_doc.name, "auto_advance")
 	return timed if auto_advance else ADVANCE_WAIT_CAP
 
 
@@ -431,7 +431,7 @@ def end_active_session(session_doc) -> None:
 
 
 def finish_session(session_doc) -> None:
-	status = frappe.db.get_value("QZ Session", session_doc.name, "status", for_update=True)
+	status = frappe.db.get_value("TT Session", session_doc.name, "status", for_update=True)
 	if status in ("Ended", "Cancelled"):
 		return
 	participants = get_live_participants(session_doc.name)
@@ -448,9 +448,9 @@ def finish_session(session_doc) -> None:
 				"rank": rank,
 			}
 		)
-	frappe.db.bulk_update("QZ Participant", rank_updates)
+	frappe.db.bulk_update("TT Participant", rank_updates)
 	frappe.db.set_value(
-		"QZ Session",
+		"TT Session",
 		session_doc.name,
 		{"status": "Ended", "ended_at": now_datetime()},
 	)
@@ -472,15 +472,15 @@ def compute_points(response_ms: int, window_ms: int, streak: int, multiplier: in
 
 
 def state_key(session: str) -> str:
-	return f"qz:{session}:state"
+	return f"tt:{session}:state"
 
 
 def answered_key(session: str, question_row: str) -> str:
-	return f"qz:{session}:answered:{question_row}"
+	return f"tt:{session}:answered:{question_row}"
 
 
 def control_key(session: str) -> str:
-	return f"qz:{session}:control"
+	return f"tt:{session}:control"
 
 
 def set_state(session: str, state: dict, ttl: float) -> None:
@@ -555,7 +555,7 @@ def question_window(question, session_doc) -> int:
 
 
 def get_quiz(session_doc):
-	return frappe.get_cached_doc("QZ Quiz", session_doc.quiz)
+	return frappe.get_cached_doc("TT Quiz", session_doc.quiz)
 
 
 def get_quiz_questions(session_doc):
@@ -564,12 +564,12 @@ def get_quiz_questions(session_doc):
 
 def get_live_participants(session: str) -> list:
 	return frappe.get_all(
-		"QZ Participant",
+		"TT Participant",
 		filters={"session": session, "kicked": 0},
 		fields=["name", "nickname", "avatar", "score", "streak", "joined_at"],
 	)
 
 
 def publish_session_event(session_doc, message: dict) -> None:
-	room = f"qz_session_{session_doc.game_pin}"
+	room = f"tt_session_{session_doc.game_pin}"
 	frappe.publish_realtime(event=room, message=message, room=room, after_commit=True)

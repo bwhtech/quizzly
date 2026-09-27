@@ -22,7 +22,7 @@ TriviaTap is a live multiplayer quiz application built on Frappe. Guests join a 
 
 ## Development and Testing
 
-- use the `/agent-browser` skill to test in the browser. site: quizzly.localhost
+- use the `/agent-browser` skill to test in the browser. site: trivia-tap.localhost
 - use Administrator/admin as credentials.
 - After every bug fix or feature: Send me a Telegram Message using `tg_bot -h`, attach relevant screenshots related to the fix/feature.
 - Kill all the browser session after testing.

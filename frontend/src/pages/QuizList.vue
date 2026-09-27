@@ -67,8 +67,8 @@ async function remove(quiz) {
 	if (!(await confirm(`Delete "${quiz.title}"?`, { action: "Delete", danger: true }))) return;
 	error.value = "";
 	try {
-		// a played quiz is refused by the QZ Session link, which is the rule we want anyway
-		await call("frappe.client.delete", { doctype: "QZ Quiz", name: quiz.name });
+		// a played quiz is refused by the TT Session link, which is the rule we want anyway
+		await call("frappe.client.delete", { doctype: "TT Quiz", name: quiz.name });
 		await load();
 	} catch (e) {
 		// the framework's own link error names doctypes and links into Desk, which means

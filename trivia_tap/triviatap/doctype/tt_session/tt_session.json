@@ -22,7 +22,7 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Quiz",
-   "options": "QZ Quiz",
+   "options": "TT Quiz",
    "reqd": 1
   },
   {
@@ -91,7 +91,7 @@
  "modified": "2026-07-19 22:20:48.711216",
  "modified_by": "Administrator",
  "module": "TriviaTap",
- "name": "QZ Session",
+ "name": "TT Session",
  "naming_rule": "Random",
  "owner": "Administrator",
  "permissions": [
