@@ -1,5 +1,5 @@
 [project]
-name = "quizzly"
+name = "trivia_tap"
 authors = [
     { name = "Gajendra Nishad", email = "gajendra@bwh.tech"}
 ]

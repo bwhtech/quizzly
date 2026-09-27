@@ -1,5 +1,43 @@
 # Progress
 
+## Phase 13: Rename to TriviaTap (2026-09-27)
+
+Spec: `specs/phase-13-rename-trivia-tap.md`. Quizzly is now TriviaTap.
+
+### Done
+
+- Package `quizzly` is now `trivia_tap`, module `Quizzly` is now `TriviaTap`
+  (folder `trivia_tap/triviatap`), workspace `TriviaTap`. Every import, API
+  path, script and doc outside past specs follows.
+- SPA moved from `/quizzly/*` to `/trivia-tap/*`. The page file is
+  `www/trivia_tap.py`; two route rules map the hyphenated path onto it.
+- New logo `public/images/trivia-tap-logo.png` (256px, cropped from the source
+  art) in the host bar, the QR badge, the favicon, the apps screen and README.
+- Site config key `quizzly_avatar_pack` is now `trivia_tap_avatar_pack`, theme
+  storage key `trivia-tap-theme` (hosts get the default theme once).
+- `quizzly.localhost` moved in place, quiz data kept: Installed Application,
+  `installed_apps` default and site config, Module Def, DocType modules, old
+  workspace and Desktop Icon dropped and regenerated. Bench folder is
+  `apps/trivia_tap`, editable install and assets symlink redone.
+- `test_host_state_reaps_it_and_offers_a_fresh_game` asserted no live session at
+  all, so any open lobby on the dev site failed it. It now asserts the abandoned
+  game is not offered back.
+
+### Verified
+
+69 tests pass. On `quizzly.localhost`: `/trivia-tap/join` shows TriviaTap, host
+bar and lobby QR show the new logo, a guest joins by PIN and lands in the host
+lobby live (realtime handlers load from the renamed folder), desk shows the
+TriviaTap icon and workspace with the old quizzes.
+
+### Notes
+
+- Frappe cannot migrate a site whose app package is gone, so other installed
+  sites need the manual steps in the spec.
+- `Workspace Sidebar` is inert on this frappe version; nothing recreates it and
+  nothing needs to.
+- README screenshots in `docs/images/` still show the old name and logo.
+
 ## Phase 12: Scoreboard screen (2026-08-22)
 
 Spec: `specs/phase-12-scoreboard-screen.md`. The screen that ends a question is

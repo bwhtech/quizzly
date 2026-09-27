@@ -56,8 +56,8 @@ jspm_packages/
 
 # SPA build output
 node_modules
-quizzly/public/frontend
-quizzly/www/quizzly.html
+trivia_tap/public/frontend
+trivia_tap/www/trivia_tap.html
 
 # Claude Code
 .claude/

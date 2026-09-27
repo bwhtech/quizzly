@@ -1,7 +1,7 @@
 {
 	"private": true,
 	"type": "module",
-	"name": "quizzly",
+	"name": "trivia_tap",
 	"scripts": {
 		"postinstall": "cd frontend && yarn install --check-files",
 		"dev": "cd frontend && yarn dev",

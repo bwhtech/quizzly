@@ -1,0 +1,162 @@
+{
+ "app": "trivia_tap",
+ "charts": [],
+ "content": "[{\"id\":\"qz_sc_quiz\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"QZ Quiz\",\"col\":3}},{\"id\":\"qz_sc_session\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"QZ Session\",\"col\":3}},{\"id\":\"qz_spacer\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"qz_card_content\",\"type\":\"card\",\"data\":{\"card_name\":\"Content\",\"col\":4}},{\"id\":\"qz_card_gameplay\",\"type\":\"card\",\"data\":{\"card_name\":\"Gameplay\",\"col\":4}}]",
+ "creation": "2026-07-20 00:00:00.000000",
+ "custom_blocks": [],
+ "docstatus": 0,
+ "doctype": "Workspace",
+ "for_user": "",
+ "hide_custom": 0,
+ "icon": "zap",
+ "idx": 0,
+ "indicator_color": "orange",
+ "label": "TriviaTap",
+ "links": [
+  {
+   "description": "Quizzes hosts build and run",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Content",
+   "link_count": 1,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "QZ Quiz",
+   "link_count": 0,
+   "link_to": "QZ Quiz",
+   "link_type": "DocType",
+   "onboard": 1,
+   "type": "Link"
+  },
+  {
+   "description": "Live games and what players did in them",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Gameplay",
+   "link_count": 3,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "QZ Session",
+   "link_count": 0,
+   "link_to": "QZ Session",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "QZ Participant",
+   "link_count": 0,
+   "link_to": "QZ Participant",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "QZ Answer",
+   "link_count": 0,
+   "link_to": "QZ Answer",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  }
+ ],
+ "modified": "2026-07-20 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "TriviaTap",
+ "name": "TriviaTap",
+ "number_cards": [],
+ "owner": "Administrator",
+ "public": 1,
+ "quick_lists": [],
+ "roles": [],
+ "sequence_id": 1.0,
+ "shortcuts": [
+  {
+   "color": "Orange",
+   "doc_view": "List",
+   "label": "QZ Quiz",
+   "link_to": "QZ Quiz",
+   "stats_filter": "[]",
+   "type": "DocType"
+  },
+  {
+   "color": "Blue",
+   "doc_view": "List",
+   "label": "QZ Session",
+   "link_to": "QZ Session",
+   "stats_filter": "[]",
+   "type": "DocType"
+  }
+ ],
+ "sidebar_items": [
+  {
+   "child": 0,
+   "collapsible": 1,
+   "icon": "list-checks",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "QZ Quiz",
+   "link_to": "QZ Quiz",
+   "link_type": "DocType",
+   "open_in_new_tab": 0,
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 0,
+   "collapsible": 1,
+   "icon": "play",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "QZ Session",
+   "link_to": "QZ Session",
+   "link_type": "DocType",
+   "open_in_new_tab": 0,
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 0,
+   "collapsible": 1,
+   "icon": "users",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "QZ Participant",
+   "link_to": "QZ Participant",
+   "link_type": "DocType",
+   "open_in_new_tab": 0,
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 0,
+   "collapsible": 1,
+   "icon": "check-check",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "QZ Answer",
+   "link_to": "QZ Answer",
+   "link_type": "DocType",
+   "open_in_new_tab": 0,
+   "show_arrow": 0,
+   "type": "Link"
+  }
+ ],
+ "standard": 1,
+ "title": "TriviaTap",
+ "type": "Workspace"
+}

@@ -12,15 +12,15 @@ Scripts:
 - `loadtest_setup.py` — runs in frappe context. Mints participants directly (skips
   the single-IP join throttle, an artifact of driving from one host) and arms the
   game. Reads player count from `QZ_LOADTEST_PLAYERS` (default 100).
-- `loadtest.py` — the HTTP driver. Reads `/tmp/quizzly_loadtest.json`, polls state,
+- `loadtest.py` — the HTTP driver. Reads `/tmp/trivia_tap_loadtest.json`, polls state,
   fires one submit salvo per question, prints the latency matrix.
 
 ## Quick start
 
 ```bash
-# apps/quizzly/scripts/loadtest.sh <players> [origin] [site]
-apps/quizzly/scripts/loadtest.sh 1000
-apps/quizzly/scripts/loadtest.sh 1000 https://quiz.example.com quiz.example.com
+# apps/trivia_tap/scripts/loadtest.sh <players> [origin] [site]
+apps/trivia_tap/scripts/loadtest.sh 1000
+apps/trivia_tap/scripts/loadtest.sh 1000 https://quiz.example.com quiz.example.com
 ```
 
 Site defaults to `sites/currentsite.txt`, origin to `https://<site>`. The rest of
@@ -102,7 +102,7 @@ Tuning for a real load test:
    ticker as a foreground loop instead:
 
    ```bash
-   echo 'from quizzly import engine; engine.run_ticker()' | bench --site <site> console &
+   echo 'from trivia_tap import engine; engine.run_ticker()' | bench --site <site> console &
    ```
 
    Do not rely on the enqueued path here: under a large arm the single dev worker may
@@ -118,11 +118,11 @@ Tuning for a real load test:
 `loadtest.sh` does all of this. Run the steps by hand only when debugging one stage:
 
 ```bash
-# 1. arm the game (creates session + participants, writes /tmp/quizzly_loadtest.json)
+# 1. arm the game (creates session + participants, writes /tmp/trivia_tap_loadtest.json)
 QZ_LOADTEST_PLAYERS=1000 bench --site <site> console < scripts/loadtest_setup.py
 
 # 2. start the ticker. local: foreground loop. production: enqueue on the long worker (see Option B step 3)
-echo 'from quizzly import engine; engine.run_ticker()' | bench --site <site> console &
+echo 'from trivia_tap import engine; engine.run_ticker()' | bench --site <site> console &
 
 # 3. run the driver
 QZ_LOADTEST_ORIGIN="https://quiz.example.com" env/bin/python scripts/loadtest.py

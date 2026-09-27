@@ -4,7 +4,7 @@
 # drive it deterministically, instead of depending on the dev bench's single RQ
 # worker actually scheduling the shared ticker in time.
 #   bench --site quizzly.localhost console < scripts/loadtest_setup.py
-# Writes pin + tokens to /tmp/quizzly_loadtest.json for scripts/loadtest.py to drive.
+# Writes pin + tokens to /tmp/trivia_tap_loadtest.json for scripts/loadtest.py to drive.
 
 import json
 import os
@@ -13,11 +13,11 @@ from pathlib import Path
 
 import frappe
 
-from quizzly import api, engine
+from trivia_tap import api, engine
 
 QUIZ_TITLE = "General Knowledge"
 PLAYERS = int(os.environ.get("QZ_LOADTEST_PLAYERS", "100"))
-STATE_FILE = Path("/tmp/quizzly_loadtest.json")
+STATE_FILE = Path("/tmp/trivia_tap_loadtest.json")
 
 quiz = frappe.db.get_value("QZ Quiz", {"title": QUIZ_TITLE}, "name")
 assert quiz, f"seed {QUIZ_TITLE!r} first (scripts/seed_demo.py)"

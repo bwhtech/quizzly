@@ -21,7 +21,7 @@ const routes = [
 ];
 
 const router = createRouter({
-	history: createWebHistory("/quizzly"),
+	history: createWebHistory("/trivia-tap"),
 	routes,
 });
 
@@ -29,7 +29,7 @@ const router = createRouter({
 router.beforeEach((to) => {
 	if (to.path.startsWith("/host") && window.session_user === "Guest") {
 		window.location.href = `/login?redirect-to=${encodeURIComponent(
-			"/quizzly" + to.fullPath
+			"/trivia-tap" + to.fullPath
 		)}`;
 		return false;
 	}

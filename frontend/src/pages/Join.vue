@@ -12,7 +12,7 @@
 				</svg>
 				Live quiz
 			</p>
-			<h1 class="font-display text-6xl font-extrabold leading-none text-paper">Quizzly</h1>
+			<h1 class="font-display text-6xl font-extrabold leading-none text-paper">TriviaTap</h1>
 			<p class="mt-3 text-paper/50">
 				Type the PIN on the big screen, pick a face, and you're in.
 			</p>
@@ -185,7 +185,7 @@ async function join() {
 	error.value = "";
 	joining.value = true;
 	try {
-		const result = await call("quizzly.api.join_session", {
+		const result = await call("trivia_tap.api.join_session", {
 			pin: pin.value.trim(),
 			nickname: nickname.value.trim(),
 			avatar: avatar.value,

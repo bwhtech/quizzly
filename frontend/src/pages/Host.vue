@@ -566,7 +566,7 @@ let liveFrame = null;
 watch(qrFullscreen, (open) => (open ? qrDialog.value.showModal() : qrDialog.value.close()));
 
 const joinUrl = computed(
-	() => `${window.location.origin}/quizzly/join?pin=${session.value.game_pin}`
+	() => `${window.location.origin}/trivia-tap/join?pin=${session.value.game_pin}`
 );
 
 const LOBBY_CHIP_LIMIT = 10;
@@ -576,7 +576,7 @@ const visibleParticipants = computed(() => participants.value.slice(-LOBBY_CHIP_
 const overflowCount = computed(() => Math.max(0, participants.value.length - LOBBY_CHIP_LIMIT));
 
 // The projector shows where to go, not the whole query string.
-const joinHost = computed(() => `${window.location.host}/quizzly/join`);
+const joinHost = computed(() => `${window.location.host}/trivia-tap/join`);
 
 const timerPercent = computed(() =>
 	windowSeconds.value ? (remaining.value / windowSeconds.value) * 100 : 0
@@ -718,7 +718,7 @@ async function renderQr(url) {
 		color: { dark: "#16111F", light: "#F4F0FA" },
 	});
 	const logo = new Image();
-	logo.src = "/assets/quizzly/images/quizzly-logo.svg";
+	logo.src = "/assets/trivia_tap/images/trivia-tap-logo.png";
 	try {
 		await logo.decode();
 	} catch {
@@ -804,12 +804,12 @@ async function loadHostState() {
 	const remembered = localStorage.getItem(HOSTED_SESSION_KEY);
 	if (remembered) {
 		try {
-			return await call("quizzly.api.get_host_state", { session: remembered });
+			return await call("trivia_tap.api.get_host_state", { session: remembered });
 		} catch {
 			localStorage.removeItem(HOSTED_SESSION_KEY);
 		}
 	}
-	return await call("quizzly.api.get_host_state");
+	return await call("trivia_tap.api.get_host_state");
 }
 
 onMounted(async () => {
@@ -821,7 +821,7 @@ onMounted(async () => {
 			useSessionRoom(socket, state.game_pin, onSessionEvent, refresh);
 			return;
 		}
-		quizzes.value = await call("quizzly.api.list_quizzes");
+		quizzes.value = await call("trivia_tap.api.list_quizzes");
 		loaded.value = true;
 	} catch (e) {
 		error.value = readError(e);
@@ -831,8 +831,10 @@ onMounted(async () => {
 async function createSession(quiz) {
 	error.value = "";
 	try {
-		const created = await call("quizzly.api.create_session", { quiz });
-		await applyState(await call("quizzly.api.get_host_state", { session: created.session }));
+		const created = await call("trivia_tap.api.create_session", { quiz });
+		await applyState(
+			await call("trivia_tap.api.get_host_state", { session: created.session })
+		);
 		useSessionRoom(socket, session.value.game_pin, onSessionEvent, refresh);
 	} catch (e) {
 		error.value = readError(e);
@@ -852,13 +854,13 @@ async function hostCall(method, params = {}) {
 
 async function toggleLock() {
 	const lobby = await hostCall(
-		lobbyLocked.value ? "quizzly.api.unlock_lobby" : "quizzly.api.lock_lobby"
+		lobbyLocked.value ? "trivia_tap.api.unlock_lobby" : "trivia_tap.api.lock_lobby"
 	);
 	if (lobby) lobbyLocked.value = Boolean(lobby.lobby_locked);
 }
 
 async function toggleAutoAdvance() {
-	const result = await hostCall("quizzly.api.set_auto_advance", {
+	const result = await hostCall("trivia_tap.api.set_auto_advance", {
 		enabled: autoAdvance.value ? 0 : 1,
 	});
 	if (result) autoAdvance.value = Boolean(result.auto_advance);
@@ -870,16 +872,16 @@ async function kick(participant) {
 		danger: true,
 	});
 	if (!ok) return;
-	await hostCall("quizzly.api.kick_participant", { participant: participant.name });
+	await hostCall("trivia_tap.api.kick_participant", { participant: participant.name });
 }
 
 // the lobby only clears when the worker's first event lands, so the button has to
 // stay down until then: a second start_session throws "Session has already started"
 async function start() {
 	starting.value = true;
-	if (!(await hostCall("quizzly.api.start_session"))) starting.value = false;
+	if (!(await hostCall("trivia_tap.api.start_session"))) starting.value = false;
 }
-const next = () => hostCall("quizzly.api.next_question");
+const next = () => hostCall("trivia_tap.api.next_question");
 
 // With auto-advance off the host drives every beat, often from the back of the room with
 // a clicker, and a clicker sends arrow keys. Back is a look at screens the room already
@@ -948,7 +950,7 @@ function onKeydown(event) {
 }
 
 onMounted(() => window.addEventListener("keydown", onKeydown));
-const skip = () => hostCall("quizzly.api.skip_question");
+const skip = () => hostCall("trivia_tap.api.skip_question");
 
 async function end() {
 	const players = participants.value.length;
@@ -959,7 +961,7 @@ async function end() {
 	if (!(await confirm(prompt, { action: inLobby ? "Close lobby" : "End game", danger: true })))
 		return;
 	// a cancelled lobby has no podium to land on, so the host goes back to the quiz list
-	if ((await hostCall("quizzly.api.end_session")) && inLobby) reset();
+	if ((await hostCall("trivia_tap.api.end_session")) && inLobby) reset();
 }
 
 onUnmounted(() => {

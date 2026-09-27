@@ -12,7 +12,7 @@ name or the logo shows the new one.
 |---|---|---|
 | App name (package, `app_name`, pyproject) | `quizzly` | `trivia_tap` |
 | App title | Quizzly | TriviaTap |
-| Module | Quizzly | Trivia Tap |
+| Module | Quizzly | TriviaTap |
 | Workspace | Quizzly | TriviaTap |
 | SPA route | `/quizzly/*` | `/trivia-tap/*` |
 | Logo | `quizzly-logo.svg` | `trivia-tap-logo.png` (512px) |
@@ -36,7 +36,7 @@ moved by hand once, with quiz data kept:
 
 1. Point `Installed Application`, the `installed_apps` default and
    `site_config.installed_apps` at `trivia_tap`.
-2. Rename Module Def `Quizzly` to `Trivia Tap` (`app_name = trivia_tap`) and
+2. Rename Module Def `Quizzly` to `TriviaTap` (`app_name = trivia_tap`) and
    move the five DocTypes to it.
 3. Drop the old `Quizzly` workspace. Migrate syncs the new one.
 4. Rename `apps/quizzly` to `apps/trivia_tap`, reinstall the editable package,

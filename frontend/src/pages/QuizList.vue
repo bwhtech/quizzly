@@ -56,7 +56,7 @@ onMounted(load);
 
 async function load() {
 	try {
-		quizzes.value = await call("quizzly.api.list_quizzes");
+		quizzes.value = await call("trivia_tap.api.list_quizzes");
 		loaded.value = true;
 	} catch (e) {
 		error.value = readError(e);

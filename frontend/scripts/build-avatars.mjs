@@ -8,8 +8,8 @@ import { createAvatar } from "@dicebear/core";
 import * as collection from "@dicebear/collection";
 
 const app = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
-const packsDir = path.join(app, "quizzly/avatar_packs");
-const outRoot = path.join(app, "quizzly/public/avatars");
+const packsDir = path.join(app, "trivia_tap/avatar_packs");
+const outRoot = path.join(app, "trivia_tap/public/avatars");
 
 for (const file of await readdir(packsDir)) {
   if (!file.endsWith(".json")) continue;

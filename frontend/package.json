@@ -1,11 +1,11 @@
 {
-  "name": "quizzly-ui",
+  "name": "trivia-tap-ui",
   "private": true,
   "version": "0.0.1",
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build --base=/assets/quizzly/frontend/",
+    "build": "vite build --base=/assets/trivia_tap/frontend/",
     "serve": "vite preview",
     "build:avatars": "node scripts/build-avatars.mjs"
   },
