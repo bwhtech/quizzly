@@ -6,6 +6,7 @@ const routes = [
 		redirect: () => (window.session_user === "Guest" ? "/join" : "/host"),
 	},
 	{ path: "/join", name: "Join", component: () => import("@/pages/Join.vue") },
+	{ path: "/login", name: "Login", component: () => import("@/pages/Login.vue") },
 	{ path: "/play", name: "Play", component: () => import("@/pages/Play.vue") },
 	{ path: "/host", name: "Host", component: () => import("@/pages/Host.vue") },
 	{
@@ -27,12 +28,11 @@ const router = createRouter({
 
 // Hosting needs a real user; guests would otherwise land on an empty quiz picker.
 router.beforeEach((to) => {
-	if (to.path.startsWith("/host") && window.session_user === "Guest") {
-		window.location.href = `/login?redirect-to=${encodeURIComponent(
-			"/trivia-tap" + to.fullPath
-		)}`;
-		return false;
+	const isGuest = window.session_user === "Guest";
+	if (isGuest && to.path.startsWith("/host")) {
+		return { path: "/login", query: { redirect: to.fullPath } };
 	}
+	if (!isGuest && to.path === "/login") return "/host";
 });
 
 export default router;

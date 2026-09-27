@@ -113,6 +113,13 @@
 					{{ error }}
 				</p>
 			</form>
+
+			<RouterLink
+				class="mt-8 block text-center text-sm text-paper/45 hover:text-paper"
+				to="/login"
+			>
+				Want to host a quiz? Log in or sign up
+			</RouterLink>
 		</div>
 	</div>
 </template>
@@ -120,7 +127,7 @@
 <script setup>
 import { nextTick, onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { call } from "@/api";
+import { call, errorText } from "@/api";
 import { savePlayer } from "@/player";
 import { avatars, randomAvatar } from "@/avatars";
 import { suggestNicknames } from "@/nicknames";
@@ -193,7 +200,7 @@ async function join() {
 		savePlayer(result);
 		router.push("/play");
 	} catch (e) {
-		error.value = e.messages?.[0] || e.message;
+		error.value = errorText(e);
 	} finally {
 		joining.value = false;
 	}

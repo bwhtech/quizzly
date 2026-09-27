@@ -237,7 +237,7 @@
 <script setup>
 import { computed, inject, onMounted, ref, watch } from "vue";
 import { useRouter } from "vue-router";
-import { call } from "@/api";
+import { call, errorText } from "@/api";
 import { clearPlayer, loadPlayer } from "@/player";
 import { optionOrder, shapeFor, useCountdown, useSessionRoom } from "@/game";
 import AvatarPic from "@/components/AvatarPic.vue";
@@ -378,7 +378,7 @@ async function answer(optionId) {
 			selected_option: optionId,
 		});
 	} catch (e) {
-		error.value = e.messages?.[0] || e.message;
+		error.value = errorText(e);
 		selected.value = null;
 	}
 }
@@ -446,7 +446,7 @@ async function safeRestore() {
 			showKicked();
 			return;
 		}
-		error.value = e.messages?.[0] || e.message;
+		error.value = errorText(e);
 	}
 }
 
