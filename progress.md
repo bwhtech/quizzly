@@ -1,5 +1,38 @@
 # Progress
 
+## Phase 14: Log in and sign up inside the SPA (2026-09-28)
+
+Spec: `specs/phase-14-spa-login-signup.md`. A new host goes from `/trivia-tap`
+to a live game without leaving the SPA.
+
+### Done
+
+- `/trivia-tap/login` with Log in and Sign up tabs, styled like the join page.
+  Guests who open any `/host` route land there with `?redirect=`, and go back to
+  that route after. A logged-in user who opens it goes to `/host`.
+- `trivia_tap.auth.sign_up` creates the user with the password they typed and the
+  `Quiz Host` role, then logs them in. It keeps frappe's guards: sign up
+  disabled, the hourly sign up cap, and the same vague message for a taken email.
+- The join page links hosts to the login page.
+- Server messages are HTML (the password policy sends a `<ul>` of hints), which
+  showed up as raw tags. `errorText` in `api.js` turns them into text for every
+  screen that shows a server error.
+
+### Verified
+
+72 tests pass. In the browser on `trivia-tap.localhost`: wrong password shows
+"Invalid login credentials", a weak password shows the policy hint as text, a
+new account lands on the host screen, writes a quiz, opens a lobby, a phone
+joins by the copied link and the game plays to the podium. Logging back in from
+`/host/quizzes` returns there. Light and dark, desktop and phone width.
+
+### Notes
+
+- `trivia-tap.localhost` had sign up disabled in Website Settings. It is now on.
+  Sites that keep it off refuse the sign up tab with a clear message.
+- `Quiz Host` has desk access, so a new host is a System User. Their role only
+  reaches TriviaTap DocTypes.
+
 ## Fix: a host sees only their own games (2026-09-28)
 
 Spec: `specs/fix-host-data-scope.md`.
