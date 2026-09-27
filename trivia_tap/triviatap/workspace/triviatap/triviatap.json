@@ -1,0 +1,162 @@
+{
+ "app": "trivia_tap",
+ "charts": [],
+ "content": "[{\"id\":\"tt_sc_quiz\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"TT Quiz\",\"col\":3}},{\"id\":\"tt_sc_session\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"TT Session\",\"col\":3}},{\"id\":\"tt_spacer\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"tt_card_content\",\"type\":\"card\",\"data\":{\"card_name\":\"Content\",\"col\":4}},{\"id\":\"tt_card_gameplay\",\"type\":\"card\",\"data\":{\"card_name\":\"Gameplay\",\"col\":4}}]",
+ "creation": "2026-07-20 00:00:00.000000",
+ "custom_blocks": [],
+ "docstatus": 0,
+ "doctype": "Workspace",
+ "for_user": "",
+ "hide_custom": 0,
+ "icon": "zap",
+ "idx": 0,
+ "indicator_color": "orange",
+ "label": "TriviaTap",
+ "links": [
+  {
+   "description": "Quizzes hosts build and run",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Content",
+   "link_count": 1,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "TT Quiz",
+   "link_count": 0,
+   "link_to": "TT Quiz",
+   "link_type": "DocType",
+   "onboard": 1,
+   "type": "Link"
+  },
+  {
+   "description": "Live games and what players did in them",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Gameplay",
+   "link_count": 3,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "TT Session",
+   "link_count": 0,
+   "link_to": "TT Session",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "TT Participant",
+   "link_count": 0,
+   "link_to": "TT Participant",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "TT Answer",
+   "link_count": 0,
+   "link_to": "TT Answer",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  }
+ ],
+ "modified": "2026-09-27 23:31:47.000000",
+ "modified_by": "Administrator",
+ "module": "TriviaTap",
+ "name": "TriviaTap",
+ "number_cards": [],
+ "owner": "Administrator",
+ "public": 1,
+ "quick_lists": [],
+ "roles": [],
+ "sequence_id": 1.0,
+ "shortcuts": [
+  {
+   "color": "Orange",
+   "doc_view": "List",
+   "label": "TT Quiz",
+   "link_to": "TT Quiz",
+   "stats_filter": "[]",
+   "type": "DocType"
+  },
+  {
+   "color": "Blue",
+   "doc_view": "List",
+   "label": "TT Session",
+   "link_to": "TT Session",
+   "stats_filter": "[]",
+   "type": "DocType"
+  }
+ ],
+ "sidebar_items": [
+  {
+   "child": 0,
+   "collapsible": 1,
+   "icon": "list-checks",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "TT Quiz",
+   "link_to": "TT Quiz",
+   "link_type": "DocType",
+   "open_in_new_tab": 0,
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 0,
+   "collapsible": 1,
+   "icon": "play",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "TT Session",
+   "link_to": "TT Session",
+   "link_type": "DocType",
+   "open_in_new_tab": 0,
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 0,
+   "collapsible": 1,
+   "icon": "users",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "TT Participant",
+   "link_to": "TT Participant",
+   "link_type": "DocType",
+   "open_in_new_tab": 0,
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 0,
+   "collapsible": 1,
+   "icon": "check-check",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "TT Answer",
+   "link_to": "TT Answer",
+   "link_type": "DocType",
+   "open_in_new_tab": 0,
+   "show_arrow": 0,
+   "type": "Link"
+  }
+ ],
+ "standard": 1,
+ "title": "TriviaTap",
+ "type": "Workspace"
+}

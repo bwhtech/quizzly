@@ -6,18 +6,18 @@ All DocTypes exist, a host can create a session, and the lobby works end-to-end:
 
 ## DocTypes
 
-### QZ Quiz (the content)
+### TT Quiz (the content)
 
-Authored in Desk by hosts. `autoname: format:QZ-{####}`.
+Authored in Desk by hosts. `autoname: format:TT-{####}`.
 
 | field | type | notes |
 |---|---|---|
 | title | Data, reqd | |
 | description | Small Text | |
 | default_time_limit | Int, default 20 | seconds per question |
-| questions | Table -> QZ Question | |
+| questions | Table -> TT Question | |
 
-### QZ Question (child, istable)
+### TT Question (child, istable)
 
 | field | type | notes |
 |---|---|---|
@@ -29,13 +29,13 @@ Authored in Desk by hosts. `autoname: format:QZ-{####}`.
 
 Child rows have stable `name` (row id); answers reference it.
 
-### QZ Session (one running game)
+### TT Session (one running game)
 
 `autoname: hash`.
 
 | field | type | notes |
 |---|---|---|
-| quiz | Link QZ Quiz, reqd | |
+| quiz | Link TT Quiz, reqd | |
 | host | Link User, reqd | set server-side to session creator |
 | game_pin | Data, unique | 6 digits, generated, reused pins avoided while active |
 | status | Select Lobby\nActive\nEnded\nCancelled | |
@@ -45,13 +45,13 @@ Child rows have stable `name` (row id); answers reference it.
 | current_question | Int, default -1 | index into quiz questions |
 | started_at / ended_at | Datetime | |
 
-### QZ Participant
+### TT Participant
 
 `autoname: hash`.
 
 | field | type | notes |
 |---|---|---|
-| session | Link QZ Session, reqd | |
+| session | Link TT Session, reqd | |
 | nickname | Data, reqd | unique per session (validated in controller) |
 | token_hash | Data | sha256 of participant_token; raw token never stored |
 | score | Int, default 0 | |
@@ -60,15 +60,15 @@ Child rows have stable `name` (row id); answers reference it.
 | kicked | Check | kicked tokens rejected on all APIs |
 | joined_at | Datetime | |
 
-### QZ Answer
+### TT Answer
 
 `autoname: hash`.
 
 | field | type | notes |
 |---|---|---|
-| session | Link QZ Session, reqd | |
-| participant | Link QZ Participant, reqd | |
-| question_row | Data, reqd | child row name of QZ Question |
+| session | Link TT Session, reqd | |
+| participant | Link TT Participant, reqd | |
+| question_row | Data, reqd | child row name of TT Question |
 | selected_option | Select 1\n2\n3\n4 | |
 | is_correct | Check | computed server-side |
 | response_ms | Int | server receive time minus question opened_at |
@@ -77,18 +77,18 @@ Child rows have stable `name` (row id); answers reference it.
 Composite unique constraint (participant, question_row) via `on_doctype_update()`:
 
 ```python
-# qz_answer.py
+# tt_answer.py
 def on_doctype_update():
-    frappe.db.add_unique("QZ Answer", ["participant", "question_row"])
+    frappe.db.add_unique("TT Answer", ["participant", "question_row"])
 ```
 
 Duplicate submits die at the DB level regardless of race conditions.
 
 ## Permissions
 
-- QZ Quiz, QZ Session: role Quiz Host (create/write own), System Manager all. `if_owner` for hosts.
-- QZ Participant, QZ Answer: no direct role access for anyone but System Manager. All reads/writes go through whitelisted APIs. Guests never touch the REST resource API.
-- correct_option: exists only in QZ Question, which guests can never read. Question delivery API builds the payload explicitly, field never included.
+- TT Quiz, TT Session: role Quiz Host (create/write own), System Manager all. `if_owner` for hosts.
+- TT Participant, TT Answer: no direct role access for anyone but System Manager. All reads/writes go through whitelisted APIs. Guests never touch the REST resource API.
+- correct_option: exists only in TT Question, which guests can never read. Question delivery API builds the payload explicitly, field never included.
 
 ## APIs
 
@@ -111,11 +111,11 @@ Token: 32-byte random, returned once to the client, only sha256 stored server-si
 
 ## Lobby flow
 
-1. Host (logged-in Desk user with Quiz Host role) creates QZ Session from a quiz. PIN generated, status Lobby.
-2. Player: GET join page, enters PIN + nickname (or QR link `/join?pin=XXXXXX` prefills PIN). `join_session` validates PIN, lobby open, nickname unique + clean, creates QZ Participant, returns `participant_token`. Lobby update published on `qz_session_{pin}`.
+1. Host (logged-in Desk user with Quiz Host role) creates TT Session from a quiz. PIN generated, status Lobby.
+2. Player: GET join page, enters PIN + nickname (or QR link `/join?pin=XXXXXX` prefills PIN). `join_session` validates PIN, lobby open, nickname unique + clean, creates TT Participant, returns `participant_token`. Lobby update published on `tt_session_{pin}`.
 3. Host can lock lobby and kick players. Kicked tokens rejected on all APIs.
 
-Quiz authoring stays in Frappe Desk (free CRUD UI on QZ Quiz).
+Quiz authoring stays in Frappe Desk (free CRUD UI on TT Quiz).
 
 ## Exit criteria
 

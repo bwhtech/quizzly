@@ -1,7 +1,7 @@
 # Load driver: every guest minted by the setup script hammers submit_answer over HTTP,
 # one salvo per question, measuring the concurrency-critical path (mark_answered +
 # Answer insert + batch scoring at close). Run scripts/loadtest_setup.py first.
-#   env/bin/python apps/quizzly/scripts/loadtest.py
+#   env/bin/python apps/trivia_tap/scripts/loadtest.py
 #
 # Reports per-question and overall submit latency percentiles + error breakdown.
 
@@ -15,9 +15,9 @@ from pathlib import Path
 
 import requests
 
-ORIGIN = os.environ.get("QZ_LOADTEST_ORIGIN", "http://quizzly.localhost:8000")
-BASE = f"{ORIGIN}/api/method/quizzly.api"
-STATE_FILE = Path("/tmp/quizzly_loadtest.json")
+ORIGIN = os.environ.get("TT_LOADTEST_ORIGIN", "http://trivia-tap.localhost:8000")
+BASE = f"{ORIGIN}/api/method/trivia_tap.api"
+STATE_FILE = Path("/tmp/trivia_tap_loadtest.json")
 
 
 def submit(pin, token, question_row):

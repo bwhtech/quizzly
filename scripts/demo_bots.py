@@ -12,8 +12,8 @@ from pathlib import Path
 
 import requests
 
-BASE = "http://quizzly.localhost:8000/api/method/quizzly.api"
-STATE_FILE = Path("/tmp/quizzly_demo_bots.json")
+BASE = "http://trivia-tap.localhost:8000/api/method/trivia_tap.api"
+STATE_FILE = Path("/tmp/trivia_tap_demo_bots.json")
 
 # (nickname, avatar id, chance of answering correctly)
 BOTS = [

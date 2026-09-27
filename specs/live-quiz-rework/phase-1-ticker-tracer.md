@@ -14,9 +14,9 @@ The new architecture is sound: a session's phase lives in Redis, an external tic
 it on time and on host command, and the existing realtime/client layers need no change. If
 this slice feels right, the rest is perf and scale on top of a proven spine.
 
-## Changes (`quizzly/engine.py`)
-- Add `run_ticker`: self-looping RQ job, `job_id="qz_ticker"`, `deduplicate=True`, queue
-  `long`. Each pass: read `qz:active_sessions`; per session read state, `pop_control`,
+## Changes (`trivia_tap/engine.py`)
+- Add `run_ticker`: self-looping RQ job, `job_id="tt_ticker"`, `deduplicate=True`, queue
+  `long`. Each pass: read `tt:active_sessions`; per session read state, `pop_control`,
   and if a control fired or `now >= state["next_ts"]` call `advance_session`; then
   `frappe.db.commit()` (flush after_commit pushes); `time.sleep(TICK_SECONDS)` (0.5).
   Exit loop when the set is empty.
@@ -29,8 +29,8 @@ this slice feels right, the rest is perf and scale on top of a proven spine.
     `get_ready`, `phase="get_ready"`, `next_ts=now+GETREADY_SECONDS`.
 - Strip the internal `while/sleep` loops out of `get_ready`/`open_question`/`close_question`
   (keep their push + write bodies). Extend `set_state` payload with `phase`, `index`, `next_ts`.
-- `enqueue_game_loop`: seed initial state, `sadd` session to `qz:active_sessions`, then
-  `frappe.enqueue("quizzly.engine.run_ticker", job_id="qz_ticker", deduplicate=True, queue="long")`.
+- `enqueue_game_loop`: seed initial state, `sadd` session to `tt:active_sessions`, then
+  `frappe.enqueue("trivia_tap.engine.run_ticker", job_id="tt_ticker", deduplicate=True, queue="long")`.
 - Delete `run_game_loop` and `POLL_SECONDS` once green.
 
 Scope guard: **one game only** here. Batching (Phase 3) and answer_count throttle (Phase 4)
@@ -38,14 +38,14 @@ are untouched — keep per-participant `set_value` and per-submit `answer_count`
 the diff stays about control flow.
 
 ## Test (end-to-end feedback)
-1. `bench --site quizzly.localhost run-tests --app quizzly` — existing game tests must pass
+1. `bench --site trivia-tap.localhost run-tests --app trivia_tap` — existing game tests must pass
    against the new engine (they exercise the phase functions).
-2. `/agent-browser` headless, `quizzly.localhost`, Administrator/admin: host one quiz, join
+2. `/agent-browser` headless, `trivia-tap.localhost`, Administrator/admin: host one quiz, join
    1 guest, play a full game. Watch: get_ready pause, question + countdown, reveal + stats,
    auto-advance, podium. Then repeat testing host **skip**, **advance** (auto_advance off),
    and **end** mid-game.
-3. Confirm exactly one `qz_ticker` RQ job exists during play and it exits after the game ends.
+3. Confirm exactly one `tt_ticker` RQ job exists during play and it exits after the game ends.
 
 ## Done when
 One full game plays start to finish via the ticker, all three host commands act within
-~0.5s, tests green, no lingering `qz_ticker` job after finish.
+~0.5s, tests green, no lingering `tt_ticker` job after finish.

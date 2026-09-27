@@ -1,5 +1,56 @@
 # Progress
 
+## Phase 13: Rename to TriviaTap (2026-09-27)
+
+Spec: `specs/phase-13-rename-trivia-tap.md`. Quizzly is now TriviaTap, down to
+the DocType prefix, the dev site and the repo.
+
+### Done
+
+- Package `quizzly` is now `trivia_tap`, module `Quizzly` is now `TriviaTap`
+  (folder `trivia_tap/triviatap`), workspace `TriviaTap`.
+- DocTypes `QZ *` are now `TT *`; socket events, rooms, Redis keys, the ticker
+  job and browser storage keys moved from `qz` to `tt`. Two patches carry
+  existing sites: `rename_qz_doctypes` renames the DocTypes and their tables,
+  `rename_qz_quiz_names` turns `QZ-0092` into `TT-0092`.
+- SPA moved from `/quizzly/*` to `/trivia-tap/*`. The page file is
+  `www/trivia_tap.py`; two route rules map the hyphenated path onto it.
+- New logo `public/images/trivia-tap-logo.png` (256px, cropped from the source
+  art) in the host bar, the QR badge, the favicon, the apps screen and README.
+- Site config key is `trivia_tap_avatar_pack`, theme storage key
+  `trivia-tap-theme`.
+- Dev site `quizzly.localhost` is now `trivia-tap.localhost`, moved in place
+  with quiz data kept. Bench folder is `apps/trivia_tap`.
+- README points at `bwhtech/trivia_tap`. Renaming the repo itself needs an
+  org admin; this account has write access only.
+- Past specs, plan and progress entries use the new names too.
+- README screenshots retaken from a real game. The results screen has been two
+  screens since phase 12, so the gallery gains `host-stats.png` beside the
+  scoreboard.
+- The join page inputs showed the forms plugin's blue focus ring over the ember
+  border. `focus:ring-0` leaves the ember border alone.
+- `test_host_state_reaps_it_and_offers_a_fresh_game` asserted no live session at
+  all, so any open lobby on the dev site failed it. It now asserts the abandoned
+  game is not offered back.
+
+### Verified
+
+69 tests pass. On `trivia-tap.localhost`: the five old quizzes open under `TT-`
+names, a full five-question game plays with eight players (seven over the API,
+one in a phone-sized browser), the lobby QR shows the new logo, desk shows the
+TriviaTap icon and workspace.
+
+### Notes
+
+- Frappe cannot migrate a site whose app package is gone, so other installed
+  sites need the manual steps in the spec before the patches can run.
+- A `format:` autoname keeps its counter under an empty series key, so the
+  quiz rename needs no series change.
+- The workspace JSON `modified` had to move forward, or migrate skips it and the
+  sidebar keeps the old link labels.
+- `Workspace Sidebar` is inert on this frappe version; nothing recreates it and
+  nothing needs to.
+
 ## Phase 12: Scoreboard screen (2026-08-22)
 
 Spec: `specs/phase-12-scoreboard-screen.md`. The screen that ends a question is
@@ -25,7 +76,7 @@ now two: the answer split, then the standings.
 
 ### Verified
 
-E2E on `quizzly.localhost` at 1920x1080, six players answering over the API, a
+E2E on `trivia-tap.localhost` at 1920x1080, six players answering over the API, a
 real worker driving the loop:
 
 - Question closes to the distribution bars alone, `Show scores` moves on.
@@ -75,7 +126,7 @@ scoreboard teaches an author nothing. Sound too: a preview at a desk is not the 
 
 ### Verified
 
-E2E on `quizzly.localhost` as Administrator, build served from the app:
+E2E on `trivia-tap.localhost` as Administrator, build served from the app:
 
 - Preview on a 2-question quiz with explanations after results: 8 beats, played
   through unattended. Read screen counted 3 down, question ran its 10s window with
@@ -96,7 +147,7 @@ the scoreboard that says why the answer is right.
 ### Done
 
 - DocTypes: `explanation` (Small Text) and `explanation_image` (Attach Image) on
-  `QZ Question`, `show_explanation` (Check) on `QZ Quiz`.
+  `TT Question`, `show_explanation` (Check) on `TT Quiz`.
 - Engine (`engine.py`): new `explanation` phase between `question` and `stats`.
   `close_question` still settles scores, streaks, distribution and top 5 at the
   buzzer; whichever screen goes second is parked in Redis state by the one that
@@ -128,7 +179,7 @@ the scoreboard that says why the answer is right.
   behind the explanation, scores are already settled when it shows, it expires
   into stats on its own, and it is skipped both when the quiz toggle is off and
   when the question has nothing to say.
-- E2E on `quizzly.localhost` with the demo bots: explanation -> results on both
+- E2E on `trivia-tap.localhost` with the demo bots: explanation -> results on both
   the host-driven and auto-advance paths, image and text-only questions, host
   reload and player reload mid-explanation, and the editor toggle round-trip.
 
@@ -136,7 +187,7 @@ the scoreboard that says why the answer is right.
 
 - The bench's single `bench start` worker serves every queue, so a long
   scheduled job from another app on this bench (navgold) blocked the `long`
-  queue and left a game with no ticker. Not a Quizzly bug: the game settled
+  queue and left a game with no ticker. Not a TriviaTap bug: the game settled
   itself through `is_abandoned`, which is exactly what that guard is for. A
   dedicated `bench worker --queue long` unblocked testing.
 
@@ -163,23 +214,23 @@ per-answer costs, and fixed the guest-socket blocker Phase 3 flagged.
 - Symptom (Phase 3 note): with the real async ticker, players never advance
   `get_ready` -> `question`; they only limp via `get_state` resync.
 - Reproduced with a guest socket.io client against the live socketio server: it
-  receives `website`-room events but **nothing** on `qz_session_<pin>`, so no
+  receives `website`-room events but **nothing** on `tt_session_<pin>`, so no
   game events ever arrive live. Host "worked" only because the frontend resync
   watchdog papers over it for slow lobby changes, not fast question transitions.
-- Root cause: `apps/quizzly/package.json` has `"type": "module"`, so Node loads
+- Root cause: `apps/trivia_tap/package.json` has `"type": "module"`, so Node loads
   `realtime/handlers.js` as ESM. The frappe socketio server `require()`s it as
   CommonJS and gets `{}` instead of the handler function; `app_handler(socket)`
-  throws and is swallowed, so `qz_join`/`qz_leave` never register and no socket
+  throws and is swallowed, so `tt_join`/`tt_leave` never register and no socket
   ever joins the session room.
-- Fix: `apps/quizzly/realtime/package.json` = `{"type":"commonjs"}` overrides the
+- Fix: `apps/trivia_tap/realtime/package.json` = `{"type":"commonjs"}` overrides the
   module type for just that directory, so the CJS handler loads again without
   disturbing the ESM app root the frontend build relies on. Verified at the
-  `require()` level (now returns `function quizzly_handlers`). **Needs a socketio
+  `require()` level (now returns `function trivia_tap_handlers`). **Needs a socketio
   restart to take effect** (the running server cached the failed load).
 
 ### Tests
 
-- `run-tests --app quizzly`: 59 green. The engine test that filtered out
+- `run-tests --app trivia_tap`: 59 green. The engine test that filtered out
   `answer_count` events is unaffected (no such events emitted now).
 - Lint: pre-commit clean on all changed files.
 
@@ -202,21 +253,21 @@ loops so reveal time stops scaling with player count.
   streak-reset-to-0 for non-answerers in the same dict) flush through two
   `frappe.db.bulk_update` calls after the loop. Same commit + `question_closed`
   push as before.
-- `finish_session`: ranks persist via one `frappe.db.bulk_update("QZ
+- `finish_session`: ranks persist via one `frappe.db.bulk_update("TT
   Participant", {name: {"rank": rank}})` instead of one `set_value` per player.
 - `bulk_update` builds chunked CASE-WHEN UPDATEs and does **not** commit
-  internally, so the ticker's `qz_tick` savepoint isolation (Phase 2) is intact.
+  internally, so the ticker's `tt_tick` savepoint isolation (Phase 2) is intact.
   It also no-ops on an empty dict, so a question nobody answered is safe.
 
 ### Tests
 
-- `run-tests --app quizzly`: 22 engine + 15 game-ux tests green. Scores, streaks,
+- `run-tests --app trivia_tap`: 22 engine + 15 game-ux tests green. Scores, streaks,
   ranks, and podium identical to before — batching changed no number.
 - Load check (`scripts`-style console driver, 200 participants, half correct):
   `close_question` went **207.9 ms -> 36.7 ms**. The residual is the answer
   fetch, not the writes; write time no longer scales with player count.
 
-### Browser E2E (quizzly.localhost)
+### Browser E2E (trivia-tap.localhost)
 
 - Host + 3 guests (Alice/Bob/Cara) played "General Knowledge" driven by the real
   async `long` RQ worker (not the synchronous driver Phases 1-2 fell back to).
@@ -240,7 +291,7 @@ payoff of Phase 1's redesign.
 ### Done
 
 - `run_ticker` gained per-session isolation: each session's step runs under a
-  `qz_tick` savepoint inside its own try/except, commits on success, and on error
+  `tt_tick` savepoint inside its own try/except, commits on success, and on error
   rolls back to the savepoint + `log_error`s and continues. One bad game can no
   longer stall or kill the ticker for the others.
 - Fixed a real ticker bug the self-heal path was hiding: `get_state` read through
@@ -252,7 +303,7 @@ payoff of Phase 1's redesign.
 - Lifecycle was already airtight from Phase 1 and confirmed so: `active_sessions`
   is `srem`'d on finish, on `end`, and on abandon (all route through
   `finish_session`); the ticker `srem`s any session whose state has vanished; and
-  `enqueue_game_loop` always re-enqueues the deduped `qz_ticker`, so starting any
+  `enqueue_game_loop` always re-enqueues the deduped `tt_ticker`, so starting any
   new game self-heals a dead ticker and picks up every registered session.
   `is_abandoned` still settles a session the ticker somehow dropped.
 
@@ -264,15 +315,15 @@ payoff of Phase 1's redesign.
   would discard the whole test transaction (and, in prod, sibling sessions' writes
   from the same pass).
 
-### Browser E2E (quizzly.localhost)
+### Browser E2E (trivia-tap.localhost)
 
 - 5 concurrent games: 5 isolated browser guests joined 5 lobbies, all started, all
   rendered the same live question simultaneously (Q1 of 5), auto-advanced through
   all five questions, and every player reached the podium ("You won").
 - Backend proof via `scripts/concurrent_games.py` (console driver, phases driven by
   the real `long` RQ worker): 5 games marched in lockstep get_ready -> question ->
-  closed for q0..q4, with **exactly one** `qz_ticker` job the entire run
-  (`max concurrent qz_ticker jobs observed: 1`).
+  closed for q0..q4, with **exactly one** `tt_ticker` job the entire run
+  (`max concurrent tt_ticker jobs observed: 1`).
 
 ## Live Quiz Rework Phase 1: Ticker Tracer (2026-07-21)
 
@@ -282,8 +333,8 @@ plus a per-session Redis state machine.
 
 ### Done
 
-- `run_ticker`: one self-looping RQ job (`job_id="qz_ticker"`, `deduplicate=True`,
-  queue `long`). Each pass reads `qz:active_sessions`, per session pops control and
+- `run_ticker`: one self-looping RQ job (`job_id="tt_ticker"`, `deduplicate=True`,
+  queue `long`). Each pass reads `tt:active_sessions`, per session pops control and
   advances when a control fired or `now >= next_ts`, commits, sleeps `TICK_SECONDS`
   (0.5). Exits when the active set is empty.
 - `advance_session(session_doc, state, control)` dispatches on `state["phase"]`
@@ -299,7 +350,7 @@ plus a per-session Redis state machine.
   `enqueue_game_loop` + `run_ticker`; added coverage for auto-advance-off hold and
   advance-on-last-question finish.
 
-### Browser E2E (quizzly.localhost)
+### Browser E2E (trivia-tap.localhost)
 
 - Full game played host + guest: get_ready pause -> question + countdown -> reveal
   -> auto-advance -> podium. Host **skip** closed the question within ~0.5s; the
@@ -324,11 +375,11 @@ of eight screenshots, features, stack, dev setup, testing, contributing.
 ### Done
 
 - Eight screenshots in `docs/images/`, all from one real session against
-  `quizzly.localhost` (520 KB total). Host shots at 1440x900, player shots at
+  `trivia-tap.localhost` (520 KB total). Host shots at 1440x900, player shots at
   390x844 with DPR 2, one player shot in dark theme. Podium needed 1440x1010
   to fit its leaderboard and button in a single frame.
 - `scripts/seed_demo.py`: creates the "General Knowledge" demo quiz. Run with
-  `bench --site quizzly.localhost console < scripts/seed_demo.py`.
+  `bench --site trivia-tap.localhost console < scripts/seed_demo.py`.
 - `scripts/demo_bots.py`: joins seven named players over the guest HTTP API and
   answers questions for them at plausible accuracies, so the lobby,
   distribution and podium look like a real game. Both scripts are throwaway
@@ -338,7 +389,7 @@ of eight screenshots, features, stack, dev setup, testing, contributing.
 
 ### Verified
 
-`bench --site quizzly.localhost run-tests --app quizzly`: 56 tests, all green.
+`bench --site trivia-tap.localhost run-tests --app trivia_tap`: 56 tests, all green.
 `pre-commit run --all-files`: clean. Every command in the README was run as
 written.
 
@@ -357,13 +408,13 @@ written.
 
 ## CI workflow fixes (2026-07-20)
 
-Spec: `specs/phase-8-ci.md`, written after comparing our workflows against `frappe/wiki`. We already had wiki's server-test and linter jobs, on newer action and MariaDB versions than theirs. The one real gap is Playwright E2E, which wiki has and we don't, and which matters more here than there: quizzly is two browsers and a socket server, and the seam between them is exactly what `bench run-tests` cannot see.
+Spec: `specs/phase-8-ci.md`, written after comparing our workflows against `frappe/wiki`. We already had wiki's server-test and linter jobs, on newer action and MariaDB versions than theirs. The one real gap is Playwright E2E, which wiki has and we don't, and which matters more here than there: trivia_tap is two browsers and a socket server, and the seam between them is exactly what `bench run-tests` cannot see.
 
 The E2E harness is not built. It is half a day of work (root `package.json`, config, auth setup, two-context helpers, socketio under CI, countdown-timer flake), and `/agent-browser` already covers every fix manually, so the gap is "no unattended gate", not "untested app". Deferred until someone else contributes or a realtime regression ships unnoticed.
 
 Three config fixes shipped now, no new dependency:
 
-- `ci.yml` concurrency group was `develop-quizzly-${{ github.event.number }}`. That expands to empty on `push`, so every push to develop shared one group key and cancelled the run before it. Now `${{ github.event.number || github.ref }}`.
+- `ci.yml` concurrency group was `develop-trivia-tap-${{ github.event.number }}`. That expands to empty on `push`, so every push to develop shared one group key and cancelled the run before it. Now `${{ github.event.number || github.ref }}`.
 - `ci.yml` gained `paths-ignore` for `**.js`, `**.vue`, `**.css`, `**.ts`. Frontend-only changes no longer build a bench to run python tests that cannot have changed.
 - Dropped the `cypress/.*` exclude from the eslint pre-commit hook. Inherited from boilerplate; no such directory ever existed here.
 
@@ -438,11 +489,11 @@ No spec. `Host.vue` only, no API and no doctype change. Every host screen was si
 
 ### Verified
 
-Live on `quizzly.localhost` at 390x844: lobby with and without a player, get-ready, question, closed stats, podium. Desktop at 1440x900 renders identically to before on the lobby and question screens.
+Live on `trivia-tap.localhost` at 390x844: lobby with and without a player, get-ready, question, closed stats, podium. Desktop at 1440x900 renders identically to before on the lobby and question screens.
 
 ### Notes
 
-- The bench `long` queue is backed up with jobs from other sites behind a single worker, so `run_game_loop` never gets picked up: a started game sits on "Starting…" until `is_abandoned` settles it and the host lands on the podium. Testing ran the loop directly with `bench execute quizzly.engine.run_game_loop`. Bench config, not app code.
+- The bench `long` queue is backed up with jobs from other sites behind a single worker, so `run_game_loop` never gets picked up: a started game sits on "Starting…" until `is_abandoned` settles it and the host lands on the podium. Testing ran the loop directly with `bench execute trivia_tap.engine.run_game_loop`. Bench config, not app code.
 
 ## Phase 6: Navigation (2026-07-19)
 
@@ -459,7 +510,7 @@ Spec: `specs/phase-6-navigation.md`. Frontend only, no API and no doctype change
 
 ### Verified
 
-End to end on `quizzly.localhost`: host nav across all three screens with the active pill correct, bar gone the instant a game started and back after `New game`, a player leaving mid-question and landing on `/join`, logout landing on `/join`, and a logged-out `/host` bouncing to login with the redirect intact. 56 tests green, `pre-commit run --all-files` clean.
+End to end on `trivia-tap.localhost`: host nav across all three screens with the active pill correct, bar gone the instant a game started and back after `New game`, a player leaving mid-question and landing on `/join`, logout landing on `/join`, and a logged-out `/host` bouncing to login with the redirect intact. 56 tests green, `pre-commit run --all-files` clean.
 
 ### Deferred
 
@@ -472,10 +523,10 @@ Spec: `specs/phase-4a-content-authoring.md`. The last slice of phase 4, shipped 
 
 ### Done
 
-- `QZ Question.image` (Attach Image). `question_payload` carries `image_url`, null when absent, so an image-free quiz publishes exactly what it published before. Rendered contained above the answer grid on both screens: 40vh on the projector, 26vh on the phone, so options never leave the fold.
-- Authoring runs on `frappe.client.*` (`get`, `insert`, `save`, `delete`), plus one endpoint, `list_quizzes`, for the per-quiz question count. Four hand-written CRUD APIs were built first and then deleted: they re-implemented the framework, and their by-hand ownership check duplicated `if_owner` on `QZ Quiz`. They were not a smaller attack surface either, since `frappe.client.save` is whitelisted for every logged-in user regardless.
+- `TT Question.image` (Attach Image). `question_payload` carries `image_url`, null when absent, so an image-free quiz publishes exactly what it published before. Rendered contained above the answer grid on both screens: 40vh on the projector, 26vh on the phone, so options never leave the fold.
+- Authoring runs on `frappe.client.*` (`get`, `insert`, `save`, `delete`), plus one endpoint, `list_quizzes`, for the per-quiz question count. Four hand-written CRUD APIs were built first and then deleted: they re-implemented the framework, and their by-hand ownership check duplicated `if_owner` on `TT Quiz`. They were not a smaller attack surface either, since `frappe.client.save` is whitelisted for every logged-in user regardless.
 - Two rules the standard path imposes on the client, both found by testing and now pinned: send the loaded doc back as it came (frappe refuses a save that drops `creation` or `owner`, and rejects a stale `modified`, which is concurrent-edit protection the hand-written `save_quiz` silently lacked), and rebuild the question rows without `name` or `idx` (frappe keeps an `idx` it is given, so rows carrying the old one ignore a reorder).
-- Validation split by kind. The `QZ Quiz` controller owns integrity (at least one question, non-blank text and options, `correct_option` in 1..4) so nothing on any path can write a quiz the engine cannot play. The editor owns the 5..120 second range with native `min`/`max` and a clamp, because it is an authoring taste: engine tests use 1 to 2 second questions on purpose, and putting the range in the controller broke 26 of them for no gain.
+- Validation split by kind. The `TT Quiz` controller owns integrity (at least one question, non-blank text and options, `correct_option` in 1..4) so nothing on any path can write a quiz the engine cannot play. The editor owns the 5..120 second range with native `min`/`max` and a clamp, because it is an authoring taste: engine tests use 1 to 2 second questions on purpose, and putting the range in the controller broke 26 of them for no gain.
 - `/host/quizzes` (list, create, delete) and `/host/quizzes/:name` (editor). Options are edited inside the four game-coloured pills with the correct-option radio in place, so the author sees the player's screen while writing. Image upload is frappe-ui's `FileUploader` against the framework's `upload_file`, no custom endpoint.
 - The `/host` quiz picker now reads `list_quizzes` instead of `frappe.client.get_list` and links to the editor.
 - Tests: 5 in `tests/test_authoring.py`, covering only what this app adds to the standard path (reorder through `frappe.client.save` landing in `idx` order, the controller's rejections, the question count, `LinkExistsError` on a played quiz, `image_url` present and null). 56 green across the app.
@@ -544,10 +595,10 @@ Phase 4 was split into four independently shippable slices (`specs/phase-4a..4d`
 
 ### Done
 
-- Avatar packs. A pack is a JSON manifest in `quizzly/avatar_packs/` holding the roster, the background palette, and the framing; `site_config.quizzly_avatar_pack` picks the active one. `quizzly/avatars.py` loads it and hands it to the SPA through the existing portal boot context, so the roster has one source of truth and the join path costs no extra request. Shipped pack is DiceBear `notionists` (CC0, 24 avatars).
-- `yarn build:avatars` pre-renders `kind: "dicebear"` packs to static SVG under `quizzly/public/avatars/<pack>/`, output committed. The DiceBear libraries are devDependencies only and never reach the runtime bundle; at runtime an avatar id is just an `<img>` URL, which is also how a bought `kind: "static"` pack drops in with no code change.
-- `QZ Participant.avatar`, validated in the controller against the active roster. `join_session` takes an optional `avatar` and falls back to a crc32-of-nickname pick. `avatar` now rides along on lobby updates, leaderboards, top-5, streak callouts, podium, and `get_state`.
-- Nickname generator: three suggestions with a reroll on the join screen. Word lists live in `quizzly/nicknames.py` and reach the SPA through the boot context.
+- Avatar packs. A pack is a JSON manifest in `trivia_tap/avatar_packs/` holding the roster, the background palette, and the framing; `site_config.trivia_tap_avatar_pack` picks the active one. `trivia_tap/avatars.py` loads it and hands it to the SPA through the existing portal boot context, so the roster has one source of truth and the join path costs no extra request. Shipped pack is DiceBear `notionists` (CC0, 24 avatars).
+- `yarn build:avatars` pre-renders `kind: "dicebear"` packs to static SVG under `trivia_tap/public/avatars/<pack>/`, output committed. The DiceBear libraries are devDependencies only and never reach the runtime bundle; at runtime an avatar id is just an `<img>` URL, which is also how a bought `kind: "static"` pack drops in with no code change.
+- `TT Participant.avatar`, validated in the controller against the active roster. `join_session` takes an optional `avatar` and falls back to a crc32-of-nickname pick. `avatar` now rides along on lobby updates, leaderboards, top-5, streak callouts, podium, and `get_state`.
+- Nickname generator: three suggestions with a reroll on the join screen. Word lists live in `trivia_tap/nicknames.py` and reach the SPA through the boot context.
 - Sound synthesised with Web Audio (`frontend/src/sound.js`): countdown tick, submit blip, correct/wrong stings, podium arpeggio, plus a persisted mute toggle on both screens.
 - Tests: 9 new (`test_avatars.py`, `test_nicknames.py`). 45 green across the app.
 
@@ -560,7 +611,7 @@ Full 4-question game in headless Chrome (host + two players) against the live si
 - No free avatar library matches the 3D-rendered reference look (Inner Teens); that style is a commercial category. The pack system exists so that decision stays reversible: swapping to a bought 3D pack is a manifest plus a folder.
 - `notionists` draws half-body portraits that read as a cropped torso in a circle. Framing (`scale: 140`, `translateY: 25`) is per-pack manifest data, chosen by rendering a comparison sheet.
 - An unknown avatar id is rejected rather than defaulted, so a stale client or a manifest entry that was never rendered fails loudly instead of showing a blank circle. A test asserts every manifest id has a file on disk.
-- `quizzly/avatars.py` (module) and `quizzly/avatar_packs/` (data) are deliberately not the same name; a module and a package directory sharing a name in one directory breaks imports.
+- `trivia_tap/avatars.py` (module) and `trivia_tap/avatar_packs/` (data) are deliberately not the same name; a module and a package directory sharing a name in one directory breaks imports.
 - Players default to muted and the host defaults to audible: a classroom of phones all unmuting at once is a bad time.
 - Lobby background music is dropped from scope. A listenable loop is a composition, not a synth line.
 - Cleared three stale `Active` sessions from earlier phase testing; `get_live_host_session` picks the newest live session, so an abandoned one hides the quiz picker forever. Worth a real fix (auto-expire) if it recurs outside tests.
@@ -573,7 +624,7 @@ Full 4-question game in headless Chrome (host + two players) against the live si
 - Host screen (`Host.vue`): lobby with giant PIN, client-side QR (`qrcode`), join URL, name grid, lock/kick/auto-advance/start; game view with live answer count, timer bar, correct-answer reveal, distribution bar chart, top-5 and streak callouts, next/skip/end; podium with a 1-2-3 stand and the full leaderboard.
 - Engine: a 3-second `get_ready` read-the-question pause before each question (own Redis phase, so reconnect lands in it too). `question` payloads now carry `window_ms` (clients count down from receipt, so client clock skew cannot matter) and `randomize_answer_order`.
 - New APIs: `get_host_state` (whole host screen in one call; finds the host's live session when no name is passed, so a reload restores mid-game), `get_result` (own outcome for the interstitial, keeping per-player data out of the broadcast), `set_auto_advance` (loop re-reads the flag each pause, so it can flip mid-game). `get_state` gained rank/leaderboard and now resolves Ended sessions so a player who reloads on the podium keeps it.
-- Nickname profanity filter in `quizzly/profanity.py`, applied in `join_session`: leetspeak folded, matched as a substring against a curated wordlist.
+- Nickname profanity filter in `trivia_tap/profanity.py`, applied in `join_session`: leetspeak folded, matched as a substring against a curated wordlist.
 - Tests: 9 new in `tests/test_game_ux.py` (filter both ways, host state in lobby/mid-question/non-host, own result and rank, podium after reload). 36 green across the app.
 
 ### Exit criteria verified
@@ -582,7 +633,7 @@ Full 4-question game driven in headless Chrome with three browser sessions (host
 
 ### Notes
 
-- Socket reconnects used to go silently deaf: socket.io reconnects on its own but the server-side room membership is gone, and `qz_join` was only emitted on mount. Found in E2E when a backgrounded host tab stopped receiving events and missed the podium. `useSessionRoom` now re-emits `qz_join` on every `connect` and resyncs from the state API.
+- Socket reconnects used to go silently deaf: socket.io reconnects on its own but the server-side room membership is gone, and `tt_join` was only emitted on mount. Found in E2E when a backgrounded host tab stopped receiving events and missed the podium. `useSessionRoom` now re-emits `tt_join` on every `connect` and resyncs from the state API.
 - A centered flex column (`justify-center`) clips its own top when the content overflows; the host game view uses `m-auto` on an inner wrapper instead.
 - Percentage heights collapse inside an `items-end` flex row (the parent's height is content-derived), which is why the first distribution chart rendered blank.
 - frappe-ui's tailwind preset caps `fontSize` at `3xl`; `5xl` and `6xl` joined the existing `4xl`/`8xl` overrides.
@@ -592,8 +643,8 @@ Full 4-question game driven in headless Chrome with three browser sessions (host
 
 ### Done
 
-- `quizzly/engine.py`: RQ game loop (`queue="long"`, `job_id=qz_session_{name}`, `deduplicate`, timeout sized to quiz length). Per question: Redis state write, `question` publish (no correct answer, server `deadline_ts`), sleep-with-poll until deadline + 1s grace, close, score, `question_closed` publish (correct option, distribution, top-5, streak callouts >= 3), then auto-advance after 5s stats or wait for host (capped at 5 min, then advances anyway). After last question: ranks persisted, `podium` published, status Ended, Redis state cleared.
-- Redis keys per spec: `qz:{session}:state` (dict, TTL window+30s), `qz:{session}:answered:{question_row}` (set, duplicate pre-check), plus `qz:{session}:control` for host commands (`skip`/`advance`/`end`) polled by the loop. Host controls never touch the loop process directly; the flag survives web/worker process boundary.
+- `trivia_tap/engine.py`: RQ game loop (`queue="long"`, `job_id=tt_session_{name}`, `deduplicate`, timeout sized to quiz length). Per question: Redis state write, `question` publish (no correct answer, server `deadline_ts`), sleep-with-poll until deadline + 1s grace, close, score, `question_closed` publish (correct option, distribution, top-5, streak callouts >= 3), then auto-advance after 5s stats or wait for host (capped at 5 min, then advances anyway). After last question: ranks persisted, `podium` published, status Ended, Redis state cleared.
+- Redis keys per spec: `tt:{session}:state` (dict, TTL window+30s), `tt:{session}:answered:{question_row}` (set, duplicate pre-check), plus `tt:{session}:control` for host commands (`skip`/`advance`/`end`) polled by the loop. Host controls never touch the loop process directly; the flag survives web/worker process boundary.
 - Scoring: Kahoot formula, `response_ms` clamped to window so grace submits floor at 500 base. Streak bonus capped at 250, multiplier 0/1/2. Non-answerers get streak reset at close.
 - APIs: host `start_session` (Lobby -> Active, enqueue loop, rejects empty lobby), `next_question`, `skip_question`, `end_session` (Lobby -> Cancelled, Active -> control flag). Guest `submit_answer` (full gauntlet in spec order, returns only `{"ok": true}`, publishes `answer_count`) and `get_state` (reconnect: phase, question sans answer, `remaining_seconds`, own score/answered). Both token-scoped rate-limited.
 - Tests: 19 in `tests/test_engine.py`, all green. Whole spec checklist covered: late/duplicate/wrong-question/kicked rejection, DB unique constraint as final word (Redis pre-check bypassed), scoring boundaries + streak reset + multipliers, no `correct` substring in any pre-close payload, reconnect remaining time, full loop to podium with scripted answers.
@@ -612,12 +663,12 @@ Full game played start to podium over HTTP against the live site with the real R
 
 ### Done
 
-- All five DocTypes per spec: `QZ Quiz` (+ child `QZ Question`), `QZ Session`, `QZ Participant`, `QZ Answer`. Permissions as specified: Quiz Host `if_owner` on Quiz/Session, System Manager only on Participant/Answer. `QZ Answer` gets a DB-level unique index on (participant, question_row) via `on_doctype_update`.
-- `quizzly/api.py`: host APIs `create_session`, `lock_lobby`, `unlock_lobby`, `kick_participant`, `get_lobby` (host-only via session.host check); guest APIs `join_session`, `leave_session` (`allow_guest`, IP rate-limited 10/min). Tokens: 32-byte random, sha256 stored, raw returned once. Lobby changes publish `lobby_update` (and `kicked`) to room `qz_session_{pin}` with `after_commit=True`.
-- Nickname uniqueness (per session, non-kicked) validated in the `QZ Participant` controller; kicked nicknames are freed for reuse.
-- `quizzly/www/quizzly.py` boot context injects `csrf_token` + `site_name` so frappe-ui requests work for logged-in hosts.
+- All five DocTypes per spec: `TT Quiz` (+ child `TT Question`), `TT Session`, `TT Participant`, `TT Answer`. Permissions as specified: Quiz Host `if_owner` on Quiz/Session, System Manager only on Participant/Answer. `TT Answer` gets a DB-level unique index on (participant, question_row) via `on_doctype_update`.
+- `trivia_tap/api.py`: host APIs `create_session`, `lock_lobby`, `unlock_lobby`, `kick_participant`, `get_lobby` (host-only via session.host check); guest APIs `join_session`, `leave_session` (`allow_guest`, IP rate-limited 10/min). Tokens: 32-byte random, sha256 stored, raw returned once. Lobby changes publish `lobby_update` (and `kicked`) to room `tt_session_{pin}` with `after_commit=True`.
+- Nickname uniqueness (per session, non-kicked) validated in the `TT Participant` controller; kicked nicknames are freed for reuse.
+- `trivia_tap/www/trivia_tap.py` boot context injects `csrf_token` + `site_name` so frappe-ui requests work for logged-in hosts.
 - Frontend: `Join.vue` (PIN prefilled from `?pin=`, nickname, error display), `Play.vue` (waiting room, live lobby count, kicked banner, leave), `Host.vue` (quiz picker, giant PIN, join link, live participant chips, lock toggle, click-to-kick). Player identity kept in localStorage (`player.js`), thin `api.js` wrapper over `frappeRequest`.
-- Tests: 8 integration tests in `quizzly/tests/test_api.py`, all green (`bench --site quizzly.localhost run-tests --module quizzly.tests.test_api`; needed `set-config allow_tests true` once).
+- Tests: 8 integration tests in `trivia_tap/tests/test_api.py`, all green (`bench --site trivia-tap.localhost run-tests --module trivia_tap.tests.test_api`; needed `set-config allow_tests true` once).
 
 ### Exit criteria verified
 
@@ -633,9 +684,9 @@ All checked E2E: over HTTP+socket (node client: join publishes `lobby_update` in
 
 ### Done
 
-- App `quizzly` installed on `quizzly.localhost` (module `Quizzly`).
-- Role `Quiz Host` created via fixture (`quizzly/fixtures/role.json`, synced on migrate).
-- SPA scaffold in `frontend/`: Vue 3 + frappe-ui + Vite, socket.io-client, vue-router with `/join`, `/play`, `/host` stubs. Production build outputs to `quizzly/public/frontend` and writes `quizzly/www/quizzly.html`. Served at `/quizzly/*` via `website_route_rules`. Verified: `yarn build` passes, `/quizzly/join` returns the SPA, `yarn dev` runs.
+- App `trivia_tap` installed on `trivia-tap.localhost` (module `TriviaTap`).
+- Role `Quiz Host` created via fixture (`trivia_tap/fixtures/role.json`, synced on migrate).
+- SPA scaffold in `frontend/`: Vue 3 + frappe-ui + Vite, socket.io-client, vue-router with `/join`, `/play`, `/host` stubs. Production build outputs to `trivia_tap/public/frontend` and writes `trivia_tap/www/trivia_tap.html`. Served at `/trivia-tap/*` via `website_route_rules`. Verified: `yarn build` passes, `/trivia-tap/join` returns the SPA, `yarn dev` runs.
 
 ### Spike decision: socket push for players. WON.
 
@@ -644,13 +695,13 @@ Question: can a guest (no login) socket.io connection receive events published t
 Answer: **yes**, verified empirically on this bench (frappe develop, v17):
 
 - Guest sockets authenticate with the `sid=Guest` cookie. `frappe.realtime.get_user_info` returns `installed_apps` from the site (not the user), so app-level socket handlers load for guests too.
-- The realtime node server loads `apps/<app>/realtime/handlers.js` per connecting socket. `quizzly/realtime/handlers.js` registers `qz_join` / `qz_leave`, which join/leave room `qz_session_{pin}` (PIN validated as 6 digits).
-- Test: node socket.io-client connected as Guest, emitted `qz_join 123456`, then `frappe.publish_realtime(event="qz_session_123456", room="qz_session_123456")` from the server. Event received by the guest client.
+- The realtime node server loads `apps/<app>/realtime/handlers.js` per connecting socket. `trivia_tap/realtime/handlers.js` registers `tt_join` / `tt_leave`, which join/leave room `tt_session_{pin}` (PIN validated as 6 digits).
+- Test: node socket.io-client connected as Guest, emitted `tt_join 123456`, then `frappe.publish_realtime(event="tt_session_123456", room="tt_session_123456")` from the server. Event received by the guest client.
 
-Consequence: players subscribe over socket.io (`qz_join` after joining a session). No 1s polling fallback is built. `get_state` stays planned for reconnect only.
+Consequence: players subscribe over socket.io (`tt_join` after joining a session). No 1s polling fallback is built. `get_state` stays planned for reconnect only.
 
 ### Notes
 
 - Bench runs frappe **v17.x-develop**, not stable v16 as plan.md assumes. Spike result applies to this version.
-- `bench start` must be restarted after installing a new app: web workers only pick up the editable install at interpreter startup (symptom: `ModuleNotFoundError: No module named 'quizzly'` on every request).
+- `bench start` must be restarted after installing a new app: web workers only pick up the editable install at interpreter startup (symptom: `ModuleNotFoundError: No module named 'trivia_tap'` on every request).
 - Found and cleared a stale global `maintenance_mode: 1` in `common_site_config.json` that 503'd every site on the bench.

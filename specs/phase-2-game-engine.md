@@ -6,12 +6,12 @@ Full server-authoritative game loop: questions publish with deadlines, answers v
 
 ## Game loop
 
-One RQ background job per active session: `queue="long"`, `job_id=f"qz_session_{name}"`, `deduplicate=True`. Timeout sized to quiz length (questions x seconds + margin).
+One RQ background job per active session: `queue="long"`, `job_id=f"tt_session_{name}"`, `deduplicate=True`. Timeout sized to quiz length (questions x seconds + margin).
 
 Loop per question:
 
 1. Write Redis state.
-2. Publish `question` (text + options, NO correct answer, deadline_ts, index, total) on `qz_session_{pin}`.
+2. Publish `question` (text + options, NO correct answer, deadline_ts, index, total) on `tt_session_{pin}`.
 3. Sleep until deadline + grace.
 4. Close question in Redis, score answers.
 5. Publish `question_closed` (correct option, distribution, top-5, streak callouts).
@@ -28,8 +28,8 @@ No per-second server ticks. Question payload carries server-set `deadline_ts` (e
 ## Redis state (hot path)
 
 ```
-qz:{session}:state        -> {status, q_index, question_row, opened_at, deadline_ts}   TTL: window + 30s
-qz:{session}:answered:{q} -> SET of participant names (fast duplicate pre-check)       TTL: window + 30s
+tt:{session}:state        -> {status, q_index, question_row, opened_at, deadline_ts}   TTL: window + 30s
+tt:{session}:answered:{q} -> SET of participant names (fast duplicate pre-check)       TTL: window + 30s
 ```
 
 Via `frappe.cache`. DB is the durable record; Redis is the fast gate for submit validation.

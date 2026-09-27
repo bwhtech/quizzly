@@ -8,8 +8,8 @@ quiz.
 
 ## Tracer bullet
 
-1. `explanation` + `explanation_image` on `QZ Question`, `show_explanation` on
-   `QZ Quiz`. **Feedback: the fields save and come back.**
+1. `explanation` + `explanation_image` on `TT Question`, `show_explanation` on
+   `TT Quiz`. **Feedback: the fields save and come back.**
 2. New `explanation` phase in the engine between `question` and `stats`.
    **Feedback: the host screen shows the explanation, then the distribution.**
 3. Player phone shows its own verdict with the explanation under it.

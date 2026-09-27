@@ -1,6 +1,6 @@
 import { ref, watch } from "vue";
 
-const STORAGE_KEY = "quizzly-theme";
+const STORAGE_KEY = "trivia-tap-theme";
 const NEXT = { auto: "light", light: "dark", dark: "auto" };
 
 // "auto" leaves the attribute off entirely, so index.css falls through to

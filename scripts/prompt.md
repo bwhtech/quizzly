@@ -43,7 +43,7 @@ Then, find a way to break it into a smaller chunk and only do that chunk (i.e. c
 
 Before committing, run the feedback loops:
 
-- use agent-browser to test on quizzly.localhost site (Administrator/admin are credentials) (/frontend)
+- use agent-browser to test on trivia-tap.localhost site (Administrator/admin are credentials) (/frontend)
 
 # COMMIT
 

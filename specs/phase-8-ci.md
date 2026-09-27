@@ -2,16 +2,16 @@
 
 ## Goal
 
-Quizzly already has `.github/workflows/ci.yml` (server tests) and
+TriviaTap already has `.github/workflows/ci.yml` (server tests) and
 `linter.yml` (pre-commit, semgrep, pip-audit). Wiki has one more workflow we
 don't: **Playwright E2E against a real bench**, plus a **commitlint** job.
 
-That gap matters more here than it does for wiki. Quizzly is a realtime,
+That gap matters more here than it does for wiki. TriviaTap is a realtime,
 multi-client game: host opens a session, guests join with a PIN over
 socket.io, the server broadcasts state transitions. Every real bug in this app
 so far has lived in the seam between two browsers and the server, which is
 exactly the seam `bench run-tests` cannot see. The python tests in
-`quizzly/tests/` cover the engine; nothing covers "host starts game, player
+`trivia_tap/tests/` cover the engine; nothing covers "host starts game, player
 answers, score appears on both screens."
 
 So: add UI tests, add commitlint, tighten the two existing workflows. No new
@@ -26,7 +26,7 @@ runtime dependency, no change to app code.
 - **No unit tests for the Vue frontend.** No vitest, no jsdom. The components
   are thin and the interesting behaviour is server-authoritative. If a
   component ever grows real logic, add vitest then.
-- **No matrix builds.** One python, one node, one mariadb. Quizzly ships to
+- **No matrix builds.** One python, one node, one mariadb. TriviaTap ships to
   one bench, not to the world.
 - **No deploy / release workflow.** Nothing to deploy yet.
 - **No `.github/instructions/`.** That's wiki's Copilot config.
@@ -36,7 +36,7 @@ runtime dependency, no change to app code.
 ## Tracer bullet
 
 1. `playwright.config.ts` + one test that loads the join page and asserts the
-   PIN field renders. Green locally against `quizzly.localhost:8000`.
+   PIN field renders. Green locally against `trivia-tap.localhost:8000`.
    **Feedback: the harness works before any game logic is written into it.**
 2. Same test green in CI, on a bench the workflow builds from scratch.
 3. Two-context test: host creates a session, player joins, both see the
@@ -52,7 +52,7 @@ Copy wiki's shape, it is already tuned for Frappe:
 - `testDir: ./e2e/tests`, `fullyParallel: false`, `workers: 1`. Frappe
   sessions and a single game PIN space do not parallelize.
 - `retries: process.env.CI ? 2 : 0`, `forbidOnly: !!process.env.CI`.
-- `baseURL: process.env.BASE_URL || 'http://quizzly.test:8000'`.
+- `baseURL: process.env.BASE_URL || 'http://trivia-tap.test:8000'`.
 - `trace: 'on-first-retry'`, `video: 'retain-on-failure'`,
   `screenshot: 'only-on-failure'`.
 - Reporter: `[['github'], ['html', { open: 'never' }]]` in CI, `html` local.
@@ -94,14 +94,14 @@ proved unnecessary removed:
   Concurrency group cancels in-progress.
 - Services: redis-cache 13000, redis-queue 11000, mariadb **11.8** (match
   our `ci.yml`, not wiki's 10.6).
-- `echo "127.0.0.1 quizzly.test" | sudo tee -a /etc/hosts`.
+- `echo "127.0.0.1 trivia_tap.test" | sudo tee -a /etc/hosts`.
 - Caches: pip, yarn, and `~/.cache/ms-playwright`.
-- Bench setup, `bench get-app quizzly $GITHUB_WORKSPACE`, new site
-  `quizzly.test`, install, build.
+- Bench setup, `bench get-app trivia_tap $GITHUB_WORKSPACE`, new site
+  `trivia_tap.test`, install, build.
 - Skip the `SET GLOBAL character_set_server` lines wiki runs. MariaDB 11.8
   is utf8mb4 by default, and our `ci.yml` has been green without them.
 - `set-config allow_tests true` and `set-config host_name
-  "http://quizzly.test:8000"`.
+  "http://trivia-tap.test:8000"`.
 - Comment out `watch:` and `schedule:` in the Procfile, `bench start &`,
   then poll `curl` until the site answers (60s timeout).
   **Keep `socketio:` running.** Wiki does not care about it; we do, the whole
@@ -125,7 +125,7 @@ conventional commits by convention; this makes it a gate.
 - **`ci.yml`**: `paths-ignore` for `**.js`, `**.vue`, `**.css`, `**.ts` on
   both `push` and `pull_request`, so frontend-only changes don't spin up a
   bench for python tests that cannot have changed. Concurrency group was
-  `develop-quizzly-${{ github.event.number }}`, which is empty on `push` and
+  `develop-trivia-tap-${{ github.event.number }}`, which is empty on `push` and
   so collapsed every push to one key, each cancelling the last. Now
   `${{ github.event.number || github.ref }}`, as wiki's ui-tests does.
 - **`.pre-commit-config.yaml`**: dropped the `cypress/.*` exclude from the
@@ -155,7 +155,7 @@ Not verified locally: `paths-ignore` only demonstrates itself on a real PR.
 
 ## Done when
 
-- `yarn test:e2e` green locally against `quizzly.localhost:8000`.
+- `yarn test:e2e` green locally against `trivia-tap.localhost:8000`.
 - All three workflows green on a PR into `develop`.
 - A deliberately broken selector makes `ui-tests` red, with a screenshot in
   the uploaded artifact.

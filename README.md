@@ -1,6 +1,6 @@
 <div align="center">
 
-# <img alt="" src="quizzly/public/images/quizzly-logo.svg" width="40" height="40" align="center" /> Quizzly
+# <img alt="" src="trivia_tap/public/images/trivia-tap-logo.png" width="40" height="40" align="center" /> TriviaTap
 
 **Live multiplayer quiz, no login required**
 
@@ -10,7 +10,7 @@
 
 ## What it is
 
-Quizzly is a live quiz game built on the Frappe Framework. A host puts the game
+TriviaTap is a live quiz game built on the Frappe Framework. A host puts the game
 PIN on the big screen, players join from their phones with the PIN or by
 scanning the QR code, and nobody needs an account.
 
@@ -34,7 +34,9 @@ the game.
 
 **Between questions**
 
-<img alt="Correct answer revealed with answer distribution and top five leaderboard" src="docs/images/host-leaderboard.png" />
+<img alt="Correct answer revealed with the answer distribution" src="docs/images/host-stats.png" />
+
+<img alt="Scoreboard with the top five after the question" src="docs/images/host-leaderboard.png" />
 
 **Final results**
 
@@ -79,15 +81,15 @@ the game.
 2. In another terminal, from your bench directory:
 
 ```bash
-bench get-app https://github.com/gajjug004/quizzly --branch develop
-bench --site your-site.localhost install-app quizzly
+bench get-app https://github.com/bwhtech/trivia_tap --branch develop
+bench --site your-site.localhost install-app trivia_tap
 ```
 
-The app is served at `/quizzly` on your site. For frontend work, run the Vite
+The app is served at `/trivia-tap` on your site. For frontend work, run the Vite
 dev server against it:
 
 ```bash
-cd apps/quizzly/frontend
+cd apps/trivia_tap/frontend
 yarn install
 yarn dev
 ```
@@ -96,7 +98,7 @@ yarn dev
 
 ```bash
 bench --site your-site.localhost set-config allow_tests true
-bench --site your-site.localhost run-tests --app quizzly
+bench --site your-site.localhost run-tests --app trivia_tap
 ```
 
 ## Contributing
@@ -106,7 +108,7 @@ This app uses `pre-commit` for code formatting and linting. Please
 this repository:
 
 ```bash
-cd apps/quizzly
+cd apps/trivia_tap
 pre-commit install
 ```
 

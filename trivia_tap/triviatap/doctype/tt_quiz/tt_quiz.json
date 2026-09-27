@@ -1,0 +1,120 @@
+{
+ "actions": [],
+ "allow_import": 1,
+ "autoname": "format:TT-{####}",
+ "creation": "2026-07-19 12:00:00",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "title",
+  "description",
+  "default_time_limit",
+  "show_explanation",
+  "explanation_position",
+  "explanation_time_limit",
+  "show_host_controls",
+  "questions"
+ ],
+ "fields": [
+  {
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Title",
+   "reqd": 1
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Small Text",
+   "label": "Description"
+  },
+  {
+   "default": "20",
+   "description": "Seconds per question, unless overridden on a question",
+   "fieldname": "default_time_limit",
+   "fieldtype": "Int",
+   "label": "Default Time Limit"
+  },
+  {
+   "default": "0",
+   "description": "Show a question's explanation before the scoreboard",
+   "fieldname": "show_explanation",
+   "fieldtype": "Check",
+   "label": "Explain Answers"
+  },
+  {
+   "default": "Before Stats",
+   "depends_on": "show_explanation",
+   "description": "Where the explanation sits relative to the answer distribution",
+   "fieldname": "explanation_position",
+   "fieldtype": "Select",
+   "label": "Explanation Position",
+   "options": "Before Stats\nAfter Stats"
+  },
+  {
+   "default": "10",
+   "depends_on": "show_explanation",
+   "description": "Seconds the explanation stays up when auto-advance is on",
+   "fieldname": "explanation_time_limit",
+   "fieldtype": "Int",
+   "label": "Explanation Time Limit"
+  },
+  {
+   "default": "0",
+   "description": "Show Skip, Auto-advance and End game buttons on the host screen during play",
+   "fieldname": "show_host_controls",
+   "fieldtype": "Check",
+   "label": "In-Game Host Controls"
+  },
+  {
+   "fieldname": "questions",
+   "fieldtype": "Table",
+   "label": "Questions",
+   "options": "TT Question",
+   "reqd": 1
+  }
+ ],
+ "links": [],
+ "modified": "2026-08-20 10:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "TriviaTap",
+ "name": "TT Quiz",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "if_owner": 1,
+   "read": 1,
+   "role": "Quiz Host",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "import": 1,
+   "print": 1,
+   "report": 1,
+   "role": "Quiz Host",
+   "share": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

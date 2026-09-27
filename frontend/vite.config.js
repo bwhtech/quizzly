@@ -10,7 +10,7 @@ export default defineConfig({
 			lucideIcons: true,
 			jinjaBootData: true,
 			buildConfig: {
-				indexHtmlPath: "../quizzly/www/quizzly.html",
+				indexHtmlPath: "../trivia_tap/www/trivia_tap.html",
 				emptyOutDir: true,
 				sourcemap: true,
 			},

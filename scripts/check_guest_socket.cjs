@@ -1,16 +1,16 @@
-// Verifies the Phase 0 spike result: a guest socket can join a qz_session
+// Verifies the Phase 0 spike result: a guest socket can join a tt_session
 // room and receive server-published events. Run from the app root:
 //   node scripts/check_guest_socket.cjs
 // then publish from the bench:
-//   bench --site quizzly.localhost execute frappe.publish_realtime \
-//     --kwargs '{"event": "qz_session_123456", "message": {"type": "check"}, "room": "qz_session_123456"}'
+//   bench --site trivia-tap.localhost execute frappe.publish_realtime \
+//     --kwargs '{"event": "tt_session_123456", "message": {"type": "check"}, "room": "tt_session_123456"}'
 const path = require("path");
 const { io } = require(path.join(
   __dirname,
   "../frontend/node_modules/socket.io-client"
 ));
 
-const SITE = "quizzly.localhost";
+const SITE = "trivia-tap.localhost";
 const PIN = "123456";
 
 const socket = io(`http://${SITE}:9000/${SITE}`, {
@@ -25,11 +25,11 @@ let got_event = false;
 
 socket.on("connect", () => {
   console.log("connected as guest:", socket.id);
-  socket.emit("qz_join", PIN);
-  console.log(`joined qz_session_${PIN}, waiting for a published event...`);
+  socket.emit("tt_join", PIN);
+  console.log(`joined tt_session_${PIN}, waiting for a published event...`);
 });
 
-socket.on(`qz_session_${PIN}`, (data) => {
+socket.on(`tt_session_${PIN}`, (data) => {
   got_event = true;
   console.log("PASS: received", JSON.stringify(data));
   process.exit(0);

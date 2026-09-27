@@ -10,13 +10,13 @@ A host can create and edit a quiz entirely in the SPA, including a picture on an
 
 Ship the thinnest end-to-end path first, then widen:
 
-1. `image` Attach Image field on `QZ Question` + question payload carries `image_url` + player and host question views render it. Author the image in Desk for this step. **Feedback: an image shows up mid-game on both screens.**
+1. `image` Attach Image field on `TT Question` + question payload carries `image_url` + player and host question views render it. Author the image in Desk for this step. **Feedback: an image shows up mid-game on both screens.**
 2. `/host/quizzes` list + `/host/quizzes/new` create form that saves a quiz with one question through a whitelisted API. **Feedback: a quiz authored in the SPA is playable.**
 3. Widen the form: edit, delete, reorder, per-question time limit and multiplier, upload image from the form.
 
 ## Data model
 
-`QZ Question` gains:
+`TT Question` gains:
 
 - `image` — Attach Image, optional.
 
@@ -24,14 +24,14 @@ No other schema change. Images ride on the standard `File` doctype and are serve
 
 ## APIs
 
-Authoring is CRUD on one doctype, which the framework already exposes, so the editor uses `frappe.client.*` and Quizzly adds one endpoint:
+Authoring is CRUD on one doctype, which the framework already exposes, so the editor uses `frappe.client.*` and TriviaTap adds one endpoint:
 
-- `list_quizzes()` (`quizzly/api.py`) — `name`, `title` and a question count per quiz. The count is the only part `frappe.client.get_list` cannot return without an aggregate whose result key is the raw SQL expression.
-- Read: `frappe.client.get("QZ Quiz", name)`, which returns the child rows in `idx` order, image included.
+- `list_quizzes()` (`trivia_tap/api.py`) — `name`, `title` and a question count per quiz. The count is the only part `frappe.client.get_list` cannot return without an aggregate whose result key is the raw SQL expression.
+- Read: `frappe.client.get("TT Quiz", name)`, which returns the child rows in `idx` order, image included.
 - Save: `frappe.client.insert` for a new quiz, `frappe.client.save` for an existing one. `get_doc(dict).save()` replaces the child table with whatever it is given, so sending the whole list in display order makes reorder and delete a plain save.
 - Delete: `frappe.client.delete`.
 
-An app-level wrapper around each of those was written first and then deleted. It re-implemented what the framework does, and it enforced ownership by hand when `if_owner` on `QZ Quiz` already does exactly that. It was not even a smaller attack surface: `frappe.client.save` is whitelisted for every logged-in user whether or not this app calls it.
+An app-level wrapper around each of those was written first and then deleted. It re-implemented what the framework does, and it enforced ownership by hand when `if_owner` on `TT Quiz` already does exactly that. It was not even a smaller attack surface: `frappe.client.save` is whitelisted for every logged-in user whether or not this app calls it.
 
 Two rules the client has to respect on the standard path, both verified in the browser and pinned by a test:
 
@@ -42,7 +42,7 @@ Image upload reuses the framework's `/api/method/upload_file` through frappe-ui'
 
 ## Validation
 
-In the `QZ Quiz` controller, so nothing on any path can write a quiz the engine cannot play:
+In the `TT Quiz` controller, so nothing on any path can write a quiz the engine cannot play:
 
 - At least one question.
 - Each question: non-empty text, all four options non-empty, `correct_option` in 1..4.
@@ -69,7 +69,7 @@ Image display rules: contained, max 40% of the question area's height on the hos
 
 Only what this app adds to the standard path is worth a test:
 
-- A reorder sent through `frappe.client.save` lands in `tabQZ Question` `idx` order.
+- A reorder sent through `frappe.client.save` lands in `tabTT Question` `idx` order.
 - The controller rejects zero questions, a blank option, and `correct_option` out of range.
 - `list_quizzes` returns the question count.
 - Deleting a quiz a session references raises `LinkExistsError`.

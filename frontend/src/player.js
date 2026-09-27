@@ -1,4 +1,4 @@
-const KEY = "qz_player";
+const KEY = "tt_player";
 
 export function savePlayer(joinResult) {
 	localStorage.setItem(

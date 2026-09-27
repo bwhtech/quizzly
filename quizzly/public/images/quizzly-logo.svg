@@ -1,8 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Quizzly">
-	<rect width="64" height="64" rx="16" fill="#16111F" />
-	<circle cx="29" cy="28" r="13.5" fill="none" stroke="#F4F0FA" stroke-width="6.5" />
-	<g transform="translate(36 28) rotate(-32) scale(1.2)">
-		<path d="M0 0 -7 13 -1 13 -4 25 8 9 1 9 Z" fill="none" stroke="#16111F" stroke-width="4" stroke-linejoin="round" />
-		<path d="M0 0 -7 13 -1 13 -4 25 8 9 1 9 Z" fill="#FFC43D" />
-	</g>
-</svg>

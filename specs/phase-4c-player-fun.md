@@ -8,7 +8,7 @@ Joining and playing feel like a game rather than a form. No engine changes: scor
 
 ## Tracer bullet
 
-1. `avatar` field on `QZ Participant`, picked on the join screen, rendered on the host lobby and leaderboard. **Feedback: a player's face shows up on the big screen.**
+1. `avatar` field on `TT Participant`, picked on the join screen, rendered on the host lobby and leaderboard. **Feedback: a player's face shows up on the big screen.**
 2. Nickname generator: three safe suggestions on the join screen, tap to accept, still free to type your own.
 3. Sound: lobby music, countdown tick, answer sfx, podium sting, with a mute toggle that persists.
 
@@ -20,7 +20,7 @@ Picked from a pack, never uploaded. No file storage from users, no moderation pr
 
 The pack is the unit of configuration: swapping art style, editing the roster, or adding avatars must never require a code change.
 
-A pack is one JSON manifest in `quizzly/avatar_packs/<pack>.json`:
+A pack is one JSON manifest in `trivia_tap/avatar_packs/<pack>.json`:
 
 ```json
 {
@@ -34,13 +34,13 @@ A pack is one JSON manifest in `quizzly/avatar_packs/<pack>.json`:
 }
 ```
 
-- Active pack from `site_config.quizzly_avatar_pack`, defaulting to the shipped one. One setting, no DocType, because this changes roughly never.
+- Active pack from `site_config.trivia_tap_avatar_pack`, defaulting to the shipped one. One setting, no DocType, because this changes roughly never.
 - `avatars` is the ordered roster the picker renders and the server validates against. Adding an avatar is one line in the manifest.
-- `kind: "dicebear"` packs are pre-rendered to static SVG by `yarn build:avatars`, output committed under `quizzly/public/avatars/<pack>/<id>.svg`. `kind: "static"` packs skip the script and just ship an image folder, which is how a bought 3D pack drops in later.
+- `kind: "dicebear"` packs are pre-rendered to static SVG by `yarn build:avatars`, output committed under `trivia_tap/public/avatars/<pack>/<id>.svg`. `kind: "static"` packs skip the script and just ship an image folder, which is how a bought 3D pack drops in later.
 
 Pre-rendering, rather than generating in the browser, keeps the DiceBear libraries out of the runtime bundle entirely and makes both pack kinds identical at runtime: an id resolves to an `<img>` URL.
 
-Python owns the manifest and hands it to the SPA through the existing `www/quizzly.py` boot context, so there is a single source of truth and no extra request on the join path.
+Python owns the manifest and hands it to the SPA through the existing `www/trivia_tap.py` boot context, so there is a single source of truth and no extra request on the join path.
 
 ### Default pack
 
@@ -48,7 +48,7 @@ DiceBear `notionists`, CC0 1.0, no attribution required. 2D vector rather than t
 
 ### Model and payloads
 
-- `QZ Participant.avatar` — Data, stores the chosen avatar id, validated in the controller against the active pack roster. An unknown id is rejected rather than silently defaulted, because it would otherwise render as a blank on the host screen.
+- `TT Participant.avatar` — Data, stores the chosen avatar id, validated in the controller against the active pack roster. An unknown id is rejected rather than silently defaulted, because it would otherwise render as a blank on the host screen.
 - `join_session` accepts an optional `avatar`, defaulting to one derived from the nickname hash so an old client still gets something reasonable.
 - `lobby_update`, leaderboard, and podium payloads carry `avatar` alongside `nickname`.
 

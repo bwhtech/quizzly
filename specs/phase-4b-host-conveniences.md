@@ -11,7 +11,7 @@ After a game ends the host can see past sessions and pull the results out as a C
 1. `export_results(session)` returns a CSV download for one ended session, linked from the existing podium screen. **Feedback: host clicks a button on the podium and gets a real file.**
 2. `/host/history` list of the host's past sessions, each row linking to a read-only recap with the final leaderboard and the same export button.
 
-## APIs (`quizzly/api.py`, host-only, logged in)
+## APIs (`trivia_tap/api.py`, host-only, logged in)
 
 - `list_sessions(limit=20, start=0)` — the host's own sessions, newest first: pin, quiz title, status, `started_at`, `ended_at`, participant count. Paged, because history grows without bound.
 - `get_session_recap(session)` — final leaderboard (reuses `get_leaderboard`) plus per-question accuracy: for each question, the answer distribution and percent correct.
@@ -40,7 +40,7 @@ Cell values: `correct`, `wrong`, or empty when the player never answered. A seco
 
 - `export_results` on a played session emits one row per participant with correct per-question cells, including the empty cell for a non-answerer.
 - `list_sessions` returns only the calling host's sessions, and pages correctly.
-- `get_session_recap` accuracy math matches the raw `QZ Answer` rows.
+- `get_session_recap` accuracy math matches the raw `TT Answer` rows.
 - A non-owner host calling any of the three gets a permission error.
 
 ## Exit criteria

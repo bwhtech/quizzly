@@ -1,17 +1,17 @@
 const GAME_PIN = /^\d{6}$/;
 
-function quizzly_handlers(socket) {
-	socket.on("qz_join", (pin) => {
+function trivia_tap_handlers(socket) {
+	socket.on("tt_join", (pin) => {
 		if (typeof pin === "string" && GAME_PIN.test(pin)) {
-			socket.join("qz_session_" + pin);
+			socket.join("tt_session_" + pin);
 		}
 	});
 
-	socket.on("qz_leave", (pin) => {
+	socket.on("tt_leave", (pin) => {
 		if (typeof pin === "string" && GAME_PIN.test(pin)) {
-			socket.leave("qz_session_" + pin);
+			socket.leave("tt_session_" + pin);
 		}
 	});
 }
 
-module.exports = quizzly_handlers;
+module.exports = trivia_tap_handlers;

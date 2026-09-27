@@ -1,0 +1,107 @@
+{
+ "actions": [],
+ "creation": "2026-07-19 12:00:00",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "question_text",
+  "image",
+  "option_1",
+  "option_2",
+  "option_3",
+  "option_4",
+  "correct_option",
+  "explanation",
+  "explanation_image",
+  "time_limit",
+  "points_multiplier"
+ ],
+ "fields": [
+  {
+   "fieldname": "question_text",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "label": "Question",
+   "reqd": 1
+  },
+  {
+   "fieldname": "image",
+   "fieldtype": "Attach Image",
+   "label": "Image"
+  },
+  {
+   "fieldname": "option_1",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Option 1",
+   "reqd": 1
+  },
+  {
+   "fieldname": "option_2",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Option 2",
+   "reqd": 1
+  },
+  {
+   "fieldname": "option_3",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Option 3",
+   "reqd": 1
+  },
+  {
+   "fieldname": "option_4",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Option 4",
+   "reqd": 1
+  },
+  {
+   "fieldname": "correct_option",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Correct Option",
+   "options": "1\n2\n3\n4",
+   "reqd": 1
+  },
+  {
+   "description": "Shown after the question closes, if the quiz explains answers.",
+   "fieldname": "explanation",
+   "fieldtype": "Small Text",
+   "label": "Explanation"
+  },
+  {
+   "fieldname": "explanation_image",
+   "fieldtype": "Attach Image",
+   "label": "Explanation Image"
+  },
+  {
+   "description": "Seconds. Blank uses the quiz default.",
+   "fieldname": "time_limit",
+   "fieldtype": "Int",
+   "label": "Time Limit"
+  },
+  {
+   "default": "1",
+   "description": "0 = fun question, 2 = double points",
+   "fieldname": "points_multiplier",
+   "fieldtype": "Select",
+   "label": "Points Multiplier",
+   "options": "0\n1\n2"
+  }
+ ],
+ "istable": 1,
+ "links": [],
+ "modified": "2026-07-19 22:20:48.097861",
+ "modified_by": "Administrator",
+ "module": "TriviaTap",
+ "name": "TT Question",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

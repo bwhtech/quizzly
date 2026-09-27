@@ -1,8 +1,8 @@
-# Quizzly: Build Plan
+# TriviaTap: Build Plan
 
-**Quizzly** is a standalone product: Kahoot-style live multiplayer quiz on Frappe. Guests join with PIN or QR, no login. Server-authoritative anti-cheat.
+**TriviaTap** is a standalone product: Kahoot-style live multiplayer quiz on Frappe. Guests join with PIN or QR, no login. Server-authoritative anti-cheat.
 
-Naming: product/brand = Quizzly everywhere. App `quizzly`, module `Quizzly`, DocType prefix `QZ`, event prefix `qz_`, Redis prefix `qz:`.
+Naming: product/brand = TriviaTap everywhere. App `trivia_tap`, module `TriviaTap`, DocType prefix `TT`, event prefix `tt_`, Redis prefix `tt:`.
 
 ## 1. Research: what Kahoot/Quizizz do
 
@@ -40,18 +40,18 @@ v1 player device shows the full question (remote-friendly). Colored shape button
 
 ## 2. Architecture (Frappe specifics)
 
-- App `quizzly`, module `Quizzly`. Stable Frappe v16, no nightly/experimental features.
-- **Push:** `frappe.publish_realtime(event, data, room=...)` for everything server to client. One event name per session: `qz_session_{pin}`, payload carries `type` field (lobby_update, countdown, question, question_closed, leaderboard, podium, kicked, session_ended). Client subscribes once, switches on type.
+- App `trivia_tap`, module `TriviaTap`. Stable Frappe v16, no nightly/experimental features.
+- **Push:** `frappe.publish_realtime(event, data, room=...)` for everything server to client. One event name per session: `tt_session_{pin}`, payload carries `type` field (lobby_update, countdown, question, question_closed, leaderboard, podium, kicked, session_ended). Client subscribes once, switches on type.
 - **Pull:** every client to server action is a whitelisted HTTP API with `allow_guest=True` where needed. Never socket emit for actions (custom socket handlers are experimental/nightly in Frappe).
-- **Game loop:** one RQ background job per active session (`queue="long"`, `job_id=f"qz_session_{name}"`, `deduplicate=True`). Loop: publish question, sleep window, close, score, publish stats, next. Timeout sized to quiz length (questions x seconds + margin).
+- **Game loop:** one RQ background job per active session (`queue="long"`, `job_id=f"tt_session_{name}"`, `deduplicate=True`). Loop: publish question, sleep window, close, score, publish stats, next. Timeout sized to quiz length (questions x seconds + margin).
 - **Timing:** no per-second server ticks. Question payload carries server-set `deadline_ts` (epoch float). Client renders its own countdown. Server validates every submit against Redis state.
 - **Hot state in Redis** (`frappe.cache`), keyed per session: active question index, question opened_at, deadline_ts, session status. DB is the durable record; Redis is the fast gate for submit validation.
 - **Guest sockets, Phase 0 spike:** verify a guest (no login) socket.io connection receives events published to our room on v16. Expected path: website room / explicit room param. If guests cannot receive room events on stable v16, fallback is a 1s short-poll state API for players (host stays on socket). Decide in the spike, do not build both.
 
 ### Live session flow
 
-1. Host (logged-in Desk user with Quiz Host role) creates QZ Session from a quiz. PIN generated, status Lobby.
-2. Player: GET join page, enters PIN + nickname (or QR link prefills PIN). `join_session` API validates PIN, lobby open, nickname unique + clean, creates QZ Participant, returns `participant_token`. Token stored in localStorage. Lobby update published.
+1. Host (logged-in Desk user with Quiz Host role) creates TT Session from a quiz. PIN generated, status Lobby.
+2. Player: GET join page, enters PIN + nickname (or QR link prefills PIN). `join_session` API validates PIN, lobby open, nickname unique + clean, creates TT Participant, returns `participant_token`. Token stored in localStorage. Lobby update published.
 3. Host locks lobby (optional) and starts. Status Active, game loop enqueued.
 4. Per question: loop writes Redis state, publishes `question` (text + options, NO correct answer, deadline_ts, index, total), sleeps until deadline + grace, closes question in Redis, scores answers, publishes `question_closed` (correct option, distribution, top-5, streaks).
 5. Host advances (or auto-advance after N seconds, host setting). Loop continues.
@@ -61,18 +61,18 @@ Host drop does not kill the game: the loop is server-driven, host can reload and
 
 ## 3. Database design (DocTypes)
 
-### QZ Quiz (the content)
+### TT Quiz (the content)
 
-Authored in Desk by hosts. `autoname: format:QZ-{####}`.
+Authored in Desk by hosts. `autoname: format:TT-{####}`.
 
 | field | type | notes |
 |---|---|---|
 | title | Data, reqd | |
 | description | Small Text | |
 | default_time_limit | Int, default 20 | seconds per question |
-| questions | Table -> QZ Question | |
+| questions | Table -> TT Question | |
 
-### QZ Question (child, istable)
+### TT Question (child, istable)
 
 | field | type | notes |
 |---|---|---|
@@ -84,13 +84,13 @@ Authored in Desk by hosts. `autoname: format:QZ-{####}`.
 
 Child rows have stable `name` (row id); answers reference it.
 
-### QZ Session (one running game)
+### TT Session (one running game)
 
 `autoname: hash`. Fields:
 
 | field | type | notes |
 |---|---|---|
-| quiz | Link QZ Quiz, reqd | |
+| quiz | Link TT Quiz, reqd | |
 | host | Link User, reqd | set server-side to session creator |
 | game_pin | Data, unique | 6 digits, generated, reused pins avoided while active |
 | status | Select Lobby\nActive\nEnded\nCancelled | |
@@ -100,13 +100,13 @@ Child rows have stable `name` (row id); answers reference it.
 | current_question | Int, default -1 | index into quiz questions |
 | started_at / ended_at | Datetime | |
 
-### QZ Participant
+### TT Participant
 
 `autoname: hash`.
 
 | field | type | notes |
 |---|---|---|
-| session | Link QZ Session, reqd | |
+| session | Link TT Session, reqd | |
 | nickname | Data, reqd | unique per session (validated in controller) |
 | token_hash | Data | sha256 of participant_token; raw token never stored |
 | score | Int, default 0 | |
@@ -115,15 +115,15 @@ Child rows have stable `name` (row id); answers reference it.
 | kicked | Check | kicked tokens rejected on all APIs |
 | joined_at | Datetime | |
 
-### QZ Answer
+### TT Answer
 
 `autoname: hash`.
 
 | field | type | notes |
 |---|---|---|
-| session | Link QZ Session, reqd | |
-| participant | Link QZ Participant, reqd | |
-| question_row | Data, reqd | child row name of QZ Question |
+| session | Link TT Session, reqd | |
+| participant | Link TT Participant, reqd | |
+| question_row | Data, reqd | child row name of TT Question |
 | selected_option | Select 1\n2\n3\n4 | |
 | is_correct | Check | computed server-side |
 | response_ms | Int | server receive time minus question opened_at |
@@ -132,9 +132,9 @@ Child rows have stable `name` (row id); answers reference it.
 **Composite unique constraint** (participant, question_row) via `on_doctype_update()`:
 
 ```python
-# qz_answer.py
+# tt_answer.py
 def on_doctype_update():
-    frappe.db.add_unique("QZ Answer", ["participant", "question_row"])
+    frappe.db.add_unique("TT Answer", ["participant", "question_row"])
 ```
 
 Duplicate submits die at the DB level regardless of race conditions.
@@ -142,15 +142,15 @@ Duplicate submits die at the DB level regardless of race conditions.
 ### Redis keys (hot path, not DocTypes)
 
 ```
-qz:{session}:state        -> {status, q_index, question_row, opened_at, deadline_ts}   TTL: window + 30s
-qz:{session}:answered:{q} -> SET of participant names (fast duplicate pre-check)       TTL: window + 30s
+tt:{session}:state        -> {status, q_index, question_row, opened_at, deadline_ts}   TTL: window + 30s
+tt:{session}:answered:{q} -> SET of participant names (fast duplicate pre-check)       TTL: window + 30s
 ```
 
 ### Permissions
 
-- QZ Quiz, QZ Session: role Quiz Host (create/write own), System Manager all. `if_owner` for hosts.
-- QZ Participant, QZ Answer: no direct role access for anyone but System Manager. All reads/writes go through whitelisted APIs. Guests never touch the REST resource API.
-- correct_option: exists only in QZ Question, which guests can never read. Question delivery API builds the payload explicitly, field never included.
+- TT Quiz, TT Session: role Quiz Host (create/write own), System Manager all. `if_owner` for hosts.
+- TT Participant, TT Answer: no direct role access for anyone but System Manager. All reads/writes go through whitelisted APIs. Guests never touch the REST resource API.
+- correct_option: exists only in TT Question, which guests can never read. Question delivery API builds the payload explicitly, field never included.
 
 ## 4. API surface (whitelisted)
 
@@ -222,8 +222,8 @@ Vue 3 + frappe-ui + Vite SPA in `frontend/`. frappe-ui gives Frappe-aware compos
 
 Wiring (standard Frappe SPA pattern):
 
-- SPA lives in `apps/quizzly/frontend/`; production build outputs to `apps/quizzly/quizzly/public/frontend` (`bench build --app quizzly`).
-- Served via `website_route_rules` in hooks.py: `{"from_route": "/quizzly/<path:app_path>", "to_route": "quizzly"}`.
+- SPA lives in `apps/trivia_tap/frontend/`; production build outputs to `apps/trivia_tap/trivia-tap/public/frontend` (`bench build --app trivia_tap`).
+- Served via `website_route_rules` in hooks.py: `{"from_route": "/trivia-tap/<path:app_path>", "to_route": "trivia_tap"}`.
 - Vite dev server proxies `/api` to the running `bench start` backend.
 
 Two route groups:
@@ -238,17 +238,17 @@ Host (logged in, big-screen-first):
 - Game view: current question, live answer count, distribution reveal, top-5, next/skip/end controls.
 - Podium screen: top 3 animation, full leaderboard, export results.
 
-Quiz authoring: Frappe Desk in v1 (free CRUD UI on QZ Quiz). Custom authoring UI in SPA later.
+Quiz authoring: Frappe Desk in v1 (free CRUD UI on TT Quiz). Custom authoring UI in SPA later.
 
 ## 8. Build phases
 
 ### Phase 0: foundation + spike
-- bench app `quizzly`, site, module Quizzly, roles.
+- bench app `trivia_tap`, site, module TriviaTap, roles.
 - SPA scaffold.
 - SPIKE: guest socket.io receives room-published events on v15? Yes: socket push for players. No: 1s short-poll `get_state` for players, socket for host. Decide, delete the losing path.
 
 ### Phase 1: content + session shell
-- DocTypes: QZ Quiz, QZ Question, QZ Session, QZ Participant, QZ Answer (+ unique index).
+- DocTypes: TT Quiz, TT Question, TT Session, TT Participant, TT Answer (+ unique index).
 - Host APIs: create_session, PIN generation. Join API + token issue.
 - Lobby end-to-end: join via PIN/QR, names appear live on host screen, kick, lock.
 

@@ -319,7 +319,7 @@ onMounted(async () => {
 	}
 	try {
 		const quiz = await call("frappe.client.get", {
-			doctype: "QZ Quiz",
+			doctype: "TT Quiz",
 			name: quizName.value,
 		});
 		title.value = quiz.title;
@@ -373,7 +373,7 @@ async function save() {
 	try {
 		const doc = {
 			...loadedDoc.value,
-			doctype: "QZ Quiz",
+			doctype: "TT Quiz",
 			title: title.value,
 			description: description.value,
 			default_time_limit: clampSeconds(defaultTimeLimit.value) || DEFAULT_TIME_LIMIT,
@@ -385,7 +385,7 @@ async function save() {
 			// rebuilt without name or idx: frappe keeps an idx it is given, so a row that
 			// carried its old one would ignore the reorder
 			questions: questions.value.map((question) => ({
-				doctype: "QZ Question",
+				doctype: "TT Question",
 				...Object.fromEntries(QUESTION_FIELDS.map((field) => [field, question[field]])),
 				time_limit: clampSeconds(question.time_limit),
 			})),

@@ -24,9 +24,9 @@ One component, rendered by the three host screens (not by a layout route: `App.v
 
 Contents, left to right:
 
-- **Quizzly** wordmark, links to `/host`.
+- **TriviaTap** wordmark, links to `/host`.
 - `Host` / `Quizzes` links, current route marked with the existing `data-on` treatment that `.ctl` already uses for toggles.
-- Right side: `window.session_user` (the boot value the router already reads) and a `Log out` link to `/api/method/logout?redirect-to=/quizzly/join`, the framework's own logout path. No custom endpoint.
+- Right side: `window.session_user` (the boot value the router already reads) and a `Log out` link to `/api/method/logout?redirect-to=/trivia-tap/join`, the framework's own logout path. No custom endpoint.
 
 The bar is hidden whenever `/host` holds a live session (`session` truthy in `Host.vue`). A projector screen showing a lobby, question, or podium is the whole point of that screen, and a nav bar on it is a thing 40 people in a room look at instead of the PIN.
 

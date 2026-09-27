@@ -7,7 +7,7 @@
 			to="/host"
 		>
 			<img alt="" class="size-7 rounded-md" :src="logoUrl" />
-			Quizzly
+			TriviaTap
 		</RouterLink>
 		<nav class="flex items-center gap-2">
 			<RouterLink class="ctl" :data-on="isHosting" to="/host">Host</RouterLink>
@@ -31,7 +31,7 @@ import { useRoute } from "vue-router";
 import { call } from "@/api";
 import ThemeButton from "@/components/ThemeButton.vue";
 
-const logoUrl = "/assets/quizzly/images/quizzly-logo.svg";
+const logoUrl = "/assets/trivia_tap/images/trivia-tap-logo.png";
 
 const route = useRoute();
 const user = window.session_user;
@@ -41,6 +41,6 @@ const isAuthoring = computed(() => route.path.startsWith("/host/quizzes"));
 
 async function logout() {
 	await call("logout");
-	window.location.href = "/quizzly/join";
+	window.location.href = "/trivia-tap/join";
 }
 </script>

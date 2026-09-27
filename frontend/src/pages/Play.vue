@@ -346,7 +346,7 @@ async function showResult(closedMessage) {
 	// follows it must not refetch the same result
 	if (phase.value === "result" && shownResultFor === closedMessage.question_row) return;
 	shownResultFor = closedMessage.question_row;
-	result.value = await call("quizzly.api.get_result", {
+	result.value = await call("trivia_tap.api.get_result", {
 		pin: player.value.pin,
 		token: player.value.token,
 		question_row: closedMessage.question_row,
@@ -371,7 +371,7 @@ async function answer(optionId) {
 	stopCountdown();
 	playCue("submit");
 	try {
-		await call("quizzly.api.submit_answer", {
+		await call("trivia_tap.api.submit_answer", {
 			pin: player.value.pin,
 			token: player.value.token,
 			question_row: question.value.question_row,
@@ -384,7 +384,7 @@ async function answer(optionId) {
 }
 
 async function restore() {
-	const state = await call("quizzly.api.get_state", {
+	const state = await call("trivia_tap.api.get_state", {
 		pin: player.value.pin,
 		token: player.value.token,
 	});
@@ -452,7 +452,7 @@ async function safeRestore() {
 
 async function leave() {
 	try {
-		await call("quizzly.api.leave_session", {
+		await call("trivia_tap.api.leave_session", {
 			pin: player.value.pin,
 			token: player.value.token,
 		});

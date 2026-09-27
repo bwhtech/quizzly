@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Quizzly is a live multiplayer quiz application built on Frappe. Guests join a game with a PIN or QR code, no login required, and gameplay is server-authoritative. The Python backend lives in `quizzly/`, with portal pages served from `www/`. See `plan.md` and `specs/` for the build plan.
+TriviaTap is a live multiplayer quiz application built on Frappe. Guests join a game with a PIN or QR code, no login required, and gameplay is server-authoritative. The Python backend lives in `trivia_tap/`, with portal pages served from `www/`. See `plan.md` and `specs/` for the build plan.
 
 ## IMPORTANT
 
@@ -22,7 +22,7 @@ Quizzly is a live multiplayer quiz application built on Frappe. Guests join a ga
 
 ## Development and Testing
 
-- use the `/agent-browser` skill to test in the browser. site: quizzly.localhost
+- use the `/agent-browser` skill to test in the browser. site: trivia-tap.localhost
 - use Administrator/admin as credentials.
 - After every bug fix or feature: Send me a Telegram Message using `tg_bot -h`, attach relevant screenshots related to the fix/feature.
 - Kill all the browser session after testing.

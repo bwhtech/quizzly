@@ -9,7 +9,7 @@ Server-authoritative. One RQ background job (`run_game_loop`) drives the whole g
 ## Lifecycle
 
 **1. Host creates session** (`api.create_session`)
-Pick a quiz. Creates a `QZ Session` with a random 6-digit `game_pin`, status `Lobby`.
+Pick a quiz. Creates a `TT Session` with a random 6-digit `game_pin`, status `Lobby`.
 
 **2. Guests join** (`api.join_session`, guest-allowed)
 PIN + nickname + avatar, no login. Profanity check on nickname. Server mints a secret token and stores only its SHA256 hash. The player keeps the token as their identity. A lobby update is pushed to everyone.
@@ -25,7 +25,7 @@ Status → `Active`. Enqueues the game loop job on the `long` queue. `engine.run
 - `wait_before_next` — 5s stats pause, then auto-advance, or waits (capped at 5 min) for the host's Next.
 
 **5. Players answer** (`api.submit_answer`, guest)
-Validates: session active, question open, before deadline + grace. `mark_answered` uses a Redis set as a fast duplicate gate. Inserts a `QZ Answer` with `response_ms`. A unique constraint is the second duplicate guard. Live answer count is pushed.
+Validates: session active, question open, before deadline + grace. `mark_answered` uses a Redis set as a fast duplicate gate. Inserts a `TT Answer` with `response_ms`. A unique constraint is the second duplicate guard. Live answer count is pushed.
 
 **6. Scoring** (`engine.compute_points`)
 Kahoot formula: `base = (1 - (response_ms / window_ms) / 2) * 1000`. Faster answers score more. Streak bonus is `min(streak - 1, 5) * 50`, times the question multiplier. Wrong answer scores 0 and resets the streak.
@@ -35,8 +35,8 @@ Ranks all participants, writes ranks, pushes the podium (top 3 + full leaderboar
 
 ## Two control channels
 
-- **Redis state** (`qz:{session}:state`) — current phase, deadline, question. TTL outlives each phase, so no state means no live loop.
-- **Redis control** (`qz:{session}:control`) — host commands (`skip` / `advance` / `end`) that the loop polls every 0.25s.
+- **Redis state** (`tt:{session}:state`) — current phase, deadline, question. TTL outlives each phase, so no state means no live loop.
+- **Redis control** (`tt:{session}:control`) — host commands (`skip` / `advance` / `end`) that the loop polls every 0.25s.
 
 ## Clever bits
 
@@ -46,6 +46,6 @@ Ranks all participants, writes ranks, pushes the podium (top 3 + full leaderboar
 
 ## Key files
 
-- `quizzly/engine.py` — game loop, hot state, scoring, realtime publish.
-- `quizzly/api.py` — whitelisted endpoints for host and players.
-- DocTypes: `QZ Session`, `QZ Quiz`, `QZ Question`, `QZ Participant`, `QZ Answer`.
+- `trivia_tap/engine.py` — game loop, hot state, scoring, realtime publish.
+- `trivia_tap/api.py` — whitelisted endpoints for host and players.
+- DocTypes: `TT Session`, `TT Quiz`, `TT Question`, `TT Participant`, `TT Answer`.

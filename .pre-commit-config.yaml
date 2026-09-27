@@ -8,7 +8,7 @@ repos:
     rev: v6.0.0
     hooks:
       - id: trailing-whitespace
-        files: "quizzly.*"
+        files: "trivia_tap.*"
         exclude: ".*json$|.*txt$|.*csv|.*md|.*svg"
       - id: check-merge-conflict
       - id: check-ast
@@ -38,11 +38,11 @@ repos:
         # Ignore any files that might contain jinja / bundles
         exclude: |
             (?x)^(
-                quizzly/public/dist/.*|
+                trivia_tap/public/dist/.*|
                 .*node_modules.*|
                 .*boilerplate.*|
-                quizzly/templates/includes/.*|
-                quizzly/public/js/lib/.*
+                trivia_tap/templates/includes/.*|
+                trivia_tap/public/js/lib/.*
             )$
 
 
@@ -55,11 +55,11 @@ repos:
         # Ignore any files that might contain jinja / bundles
         exclude: |
             (?x)^(
-                quizzly/public/dist/.*|
+                trivia_tap/public/dist/.*|
                 .*node_modules.*|
                 .*boilerplate.*|
-                quizzly/templates/includes/.*|
-                quizzly/public/js/lib/.*
+                trivia_tap/templates/includes/.*|
+                trivia_tap/public/js/lib/.*
             )$
 
 ci:
