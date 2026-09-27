@@ -18,6 +18,9 @@ game, share the join link or QR, play.
 The page reloads after either, because the boot context (`session_user`,
 `csrf_token`) is rendered into the page by the server.
 
+Each password field has an eye button to show what was typed. Sign up asks for
+the password twice and stops before the call when the two differ.
+
 The join page links hosts to the login page. A logged-in user who opens
 `/login` goes straight on to the host screen.
 

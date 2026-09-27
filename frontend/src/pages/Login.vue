@@ -78,12 +78,24 @@
 							Forgot?
 						</a>
 					</span>
-					<input
+					<PasswordInput
 						id="password"
 						v-model="password"
-						class="w-full rounded-2xl border border-haze bg-dusk px-4 py-3.5 text-lg font-medium text-paper placeholder:text-paper/25 focus:border-ember focus:ring-0"
-						type="password"
 						:autocomplete="isSignUp ? 'new-password' : 'current-password'"
+						required
+					/>
+				</div>
+				<div v-if="isSignUp" class="flex flex-col gap-2">
+					<label
+						class="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/45"
+						for="confirm-password"
+					>
+						Confirm password
+					</label>
+					<PasswordInput
+						id="confirm-password"
+						v-model="confirmPassword"
+						autocomplete="new-password"
 						required
 					/>
 				</div>
@@ -113,6 +125,7 @@ import { computed, ref } from "vue";
 import { useRoute } from "vue-router";
 import { call, errorText } from "@/api";
 import { SHAPES } from "@/game";
+import PasswordInput from "@/components/PasswordInput.vue";
 import ThemeButton from "@/components/ThemeButton.vue";
 
 const TABS = [
@@ -126,6 +139,7 @@ const mode = ref(route.query.mode === "signup" ? "signup" : "login");
 const fullName = ref("");
 const email = ref("");
 const password = ref("");
+const confirmPassword = ref("");
 const busy = ref(false);
 const error = ref("");
 
@@ -138,6 +152,10 @@ function switchTo(next) {
 
 async function submit() {
 	error.value = "";
+	if (isSignUp.value && password.value !== confirmPassword.value) {
+		error.value = "Passwords do not match.";
+		return;
+	}
 	busy.value = true;
 	try {
 		if (isSignUp.value) {

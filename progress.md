@@ -13,6 +13,8 @@ to a live game without leaving the SPA.
 - `trivia_tap.auth.sign_up` creates the user with the password they typed and the
   `Quiz Host` role, then logs them in. It keeps frappe's guards: sign up
   disabled, the hourly sign up cap, and the same vague message for a taken email.
+- Password fields have an eye button (`PasswordInput`). Sign up asks for the
+  password twice and says "Passwords do not match." before calling the server.
 - The join page links hosts to the login page.
 - Server messages are HTML (the password policy sends a `<ul>` of hints), which
   showed up as raw tags. `errorText` in `api.js` turns them into text for every
