@@ -1,5 +1,6 @@
 import frappe
 from frappe import _
+from frappe.core.doctype.user.user import get_signup_limit
 from frappe.rate_limiter import rate_limit
 from frappe.utils import cint, escape_html
 from frappe.website.utils import is_signup_disabled
@@ -9,7 +10,7 @@ from frappe.website.utils import is_signup_disabled
 # right away, so this one takes the password and logs them in.
 # nosemgrep: frappe-semgrep-rules.rules.security.guest-whitelisted-method
 @frappe.whitelist(allow_guest=True, methods=["POST"])
-@rate_limit(limit=5, seconds=60 * 60)
+@rate_limit(limit=get_signup_limit, seconds=60)
 def sign_up(full_name: str, email: str, password: str) -> None:
 	if is_signup_disabled():
 		frappe.throw(_("Sign up is disabled on this site."), frappe.PermissionError)

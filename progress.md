@@ -13,6 +13,9 @@ to a live game without leaving the SPA.
 - `trivia_tap.auth.sign_up` creates the user with the password they typed and the
   `Quiz Host` role, then logs them in. It keeps frappe's guards: sign up
   disabled, the hourly sign up cap, and the same vague message for a taken email.
+  Its per-IP limit is frappe's own `max_signups_per_minute`. A first cut used 5
+  per hour, which a few weak-password retries used up, and which would lock out
+  a school where every teacher shares one IP.
 - Password fields have an eye button (`PasswordInput`). Sign up asks for the
   password twice and says "Passwords do not match." before calling the server.
 - The join page links hosts to the login page.

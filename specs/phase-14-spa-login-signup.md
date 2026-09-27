@@ -26,7 +26,11 @@ The join page links hosts to the login page. A logged-in user who opens
 
 ## `sign_up(full_name, email, password)`
 
-Guest, POST only, rate limited per IP. It follows frappe's own `sign_up`:
+Guest, POST only. It follows frappe's own `sign_up`:
+
+- Rate limited per IP by Website Settings `max_signups_per_minute`, the same
+  limit frappe's sign up uses. A tighter per-IP limit locks out a school where
+  every teacher shares one address, and failed tries count toward it too.
 
 - Refused when Website Settings has sign up disabled.
 - Refused past System Settings `max_signups_allowed_per_hour`.
