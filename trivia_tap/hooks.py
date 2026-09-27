@@ -20,6 +20,16 @@ use_json_request_body = True
 
 fixtures = [{"dt": "Role", "filters": [["name", "in", ["Quiz Host"]]]}]
 
+permission_query_conditions = {
+	"TT Participant": "trivia_tap.permissions.session_host_query",
+	"TT Answer": "trivia_tap.permissions.session_host_query",
+}
+
+has_permission = {
+	"TT Participant": "trivia_tap.permissions.is_session_host",
+	"TT Answer": "trivia_tap.permissions.is_session_host",
+}
+
 website_route_rules = [
 	{"from_route": "/trivia-tap", "to_route": "trivia_tap"},
 	{"from_route": "/trivia-tap/<path:app_path>", "to_route": "trivia_tap"},
