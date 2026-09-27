@@ -1,5 +1,32 @@
 # Progress
 
+## Phase 15: Host profile (2026-09-28)
+
+Spec: `specs/phase-15-host-profile.md`.
+
+### Done
+
+- `/host/profile`, opened from a profile pill in the host bar: edit first and
+  last name, change password (current, new, confirm, each with the eye button).
+- `trivia_tap.auth.change_password` checks the current password before calling
+  frappe's `update_password`. Frappe clears the session cookies on any
+  `AuthenticationError`, so calling `update_password` directly logged the host
+  out when they mistyped their current password.
+- Host bar: logo, Host, Quizzes, then "Hi, <first name>" linking to the
+  profile. Log out moved into the profile page, the theme button floats at the
+  bottom right of host screens, and host pages keep room under their content
+  for it. The bar used to wrap to two rows on a phone; it now stays on one.
+- `PasswordInput` no longer carries the login page styling; each page passes
+  its own field classes.
+
+### Verified
+
+74 tests pass. In the browser: name saves and survives a reload, a wrong
+current password shows "Current password is wrong." and the host stays logged
+in, a mismatch is caught before the call, a real change reloads with "Password
+changed." and the next save still works, and the new password logs in. Light
+and dark, desktop and phone width.
+
 ## Phase 14: Log in and sign up inside the SPA (2026-09-28)
 
 Spec: `specs/phase-14-spa-login-signup.md`. A new host goes from `/trivia-tap`

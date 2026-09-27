@@ -10,6 +10,7 @@ def get_context(context):
 		"csrf_token": frappe.sessions.get_csrf_token(),
 		"site_name": frappe.local.site,
 		"session_user": frappe.session.user,
+		"first_name": frappe.db.get_value("User", frappe.session.user, "first_name"),
 		"avatar_pack": get_boot_pack(),
 		"nickname_words": get_boot_words(),
 	}

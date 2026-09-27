@@ -1,7 +1,7 @@
 <template>
 	<div class="flex h-full flex-col overflow-y-auto bg-night">
 		<HostBar />
-		<div class="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-6 p-5 sm:p-8">
+		<div class="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-6 p-5 pb-20 sm:p-8 sm:pb-20">
 			<div class="flex flex-col gap-2">
 				<p class="font-mono text-[11px] uppercase tracking-[0.28em] text-accent">
 					{{ isNew ? "New quiz" : "Editing" }}
