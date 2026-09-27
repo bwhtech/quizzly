@@ -9,8 +9,7 @@ def session_host_query(user: str | None = None, doctype: str | None = None) -> s
 	if is_system_manager(user):
 		return ""
 	return (
-		f"`tab{doctype}`.session in "
-		f"(select name from `tabTT Session` where host = {frappe.db.escape(user)})"
+		f"`tab{doctype}`.session in (select name from `tabTT Session` where host = {frappe.db.escape(user)})"
 	)
 
 
