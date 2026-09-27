@@ -15,7 +15,7 @@ declare module 'vue' {
     HostBar: typeof import('./src/components/HostBar.vue')['default']
     LucideEye: typeof import('~icons/lucide/eye')['default']
     LucideEyeOff: typeof import('~icons/lucide/eye-off')['default']
-    LucideUser: typeof import('~icons/lucide/user')['default']
+    LucideLogOut: typeof import('~icons/lucide/log-out')['default']
     PasswordInput: typeof import('./src/components/PasswordInput.vue')['default']
     QuizPreview: typeof import('./src/components/QuizPreview.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']

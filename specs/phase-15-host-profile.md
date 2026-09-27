@@ -7,8 +7,13 @@ without opening desk.
 
 ## Flow
 
-The host bar shows a profile pill (icon, plus the email on wider screens) that
-opens `/host/profile`. The page has two cards:
+The host bar reads, left to right: logo, Host, Quizzes, and on the right
+"Hi, <first name>", which opens `/host/profile`. The first name comes with the
+page boot and follows a rename on the profile page. Log out lives on the
+profile page, and the theme button floats at the bottom right of every host
+screen. On a phone the logo drops its wordmark so the bar stays on one row.
+
+The profile page has two cards:
 
 - **Name**: first and last name, saved with `frappe.client.set_value` on the
   host's own User. Frappe lets a user write their own User and refuses anyone

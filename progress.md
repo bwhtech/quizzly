@@ -12,6 +12,10 @@ Spec: `specs/phase-15-host-profile.md`.
   frappe's `update_password`. Frappe clears the session cookies on any
   `AuthenticationError`, so calling `update_password` directly logged the host
   out when they mistyped their current password.
+- Host bar: logo, Host, Quizzes, then "Hi, <first name>" linking to the
+  profile. Log out moved into the profile page, the theme button floats at the
+  bottom right of host screens, and host pages keep room under their content
+  for it. The bar used to wrap to two rows on a phone; it now stays on one.
 - `PasswordInput` no longer carries the login page styling; each page passes
   its own field classes.
 

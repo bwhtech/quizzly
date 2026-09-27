@@ -12,7 +12,7 @@
 		<template v-if="!session">
 			<HostBar />
 			<div
-				class="mx-auto flex w-full max-w-2xl flex-1 flex-col justify-center gap-8 p-5 sm:p-8"
+				class="mx-auto flex w-full max-w-2xl flex-1 flex-col justify-center gap-8 p-5 pb-20 sm:p-8 sm:pb-20"
 			>
 				<div>
 					<p class="font-mono text-[11px] uppercase tracking-[0.28em] text-accent">

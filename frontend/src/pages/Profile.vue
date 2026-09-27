@@ -1,13 +1,21 @@
 <template>
 	<div class="flex h-full flex-col overflow-y-auto bg-night">
 		<HostBar />
-		<div class="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-8 p-5 sm:p-8">
-			<div>
-				<p class="font-mono text-[11px] uppercase tracking-[0.28em] text-accent">Host</p>
-				<h1 class="mt-2 font-display text-4xl font-extrabold text-paper sm:text-5xl">
-					Your profile
-				</h1>
-				<p class="mt-2 font-mono text-xs text-paper/40">{{ user }}</p>
+		<div class="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-8 p-5 pb-20 sm:p-8 sm:pb-20">
+			<div class="flex items-end justify-between gap-4">
+				<div class="min-w-0">
+					<p class="font-mono text-[11px] uppercase tracking-[0.28em] text-accent">
+						Host
+					</p>
+					<h1 class="mt-2 font-display text-4xl font-extrabold text-paper sm:text-5xl">
+						Your profile
+					</h1>
+					<p class="mt-2 truncate font-mono text-xs text-paper/40">{{ user }}</p>
+				</div>
+				<button class="ctl shrink-0 gap-2" @click="logout">
+					<LucideLogOut class="size-4" />
+					Log out
+				</button>
 			</div>
 
 			<form
@@ -110,6 +118,7 @@
 import { onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { call, errorText } from "@/api";
+import { firstName as greetedName } from "@/host";
 import HostBar from "@/components/HostBar.vue";
 import PasswordInput from "@/components/PasswordInput.vue";
 
@@ -146,6 +155,7 @@ async function saveName() {
 			name: user,
 			fieldname: { first_name: firstName.value, last_name: lastName.value },
 		});
+		greetedName.value = firstName.value;
 		showNameNote("Saved.", false);
 	} catch (e) {
 		showNameNote(errorText(e), true);
@@ -171,6 +181,11 @@ async function changePassword() {
 		showPasswordNote(errorText(e), true);
 		savingPassword.value = false;
 	}
+}
+
+async function logout() {
+	await call("logout");
+	window.location.href = "/trivia-tap/join";
 }
 
 function showNameNote(text, failed) {
