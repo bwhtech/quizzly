@@ -12,7 +12,7 @@ game, share the join link or QR, play.
 ```
 /trivia-tap/host (guest) -> /trivia-tap/login?redirect=/host
   Log in:  email + password -> /api/method/login -> reload at redirect
-  Sign up: name + email + password -> trivia_tap.api.sign_up -> reload at redirect
+  Sign up: name + email + password + confirm -> trivia_tap.auth.sign_up -> reload at redirect
 ```
 
 The page reloads after either, because the boot context (`session_user`,
