@@ -21,8 +21,9 @@ the DocType prefix, the dev site and the repo.
   `trivia-tap-theme`.
 - Dev site `quizzly.localhost` is now `trivia-tap.localhost`, moved in place
   with quiz data kept. Bench folder is `apps/trivia_tap`.
-- README points at `bwhtech/trivia_tap`. Renaming the repo itself needs an
-  org admin; this account has write access only.
+- The repo rename to `bwhtech/trivia_tap` needs an org admin; this account has
+  write access only. README installs from `bwhtech/quizzly` until then, and
+  GitHub redirects that URL after the rename.
 - Past specs, plan and progress entries use the new names too.
 - README screenshots retaken from a real game. The results screen has been two
   screens since phase 12, so the gallery gains `host-stats.png` beside the

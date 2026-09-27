@@ -81,7 +81,7 @@ the game.
 2. In another terminal, from your bench directory:
 
 ```bash
-bench get-app https://github.com/bwhtech/trivia_tap --branch develop
+bench get-app https://github.com/bwhtech/quizzly --branch develop
 bench --site your-site.localhost install-app trivia_tap
 ```
 
