@@ -10,6 +10,11 @@ const routes = [
 	{ path: "/play", name: "Play", component: () => import("@/pages/Play.vue") },
 	{ path: "/host", name: "Host", component: () => import("@/pages/Host.vue") },
 	{
+		path: "/host/profile",
+		name: "Profile",
+		component: () => import("@/pages/Profile.vue"),
+	},
+	{
 		path: "/host/quizzes",
 		name: "Quizzes",
 		component: () => import("@/pages/QuizList.vue"),

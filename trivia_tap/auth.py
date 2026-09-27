@@ -1,6 +1,6 @@
 import frappe
 from frappe import _
-from frappe.core.doctype.user.user import get_signup_limit
+from frappe.core.doctype.user.user import get_signup_limit, update_password
 from frappe.rate_limiter import rate_limit
 from frappe.utils import cint, escape_html
 from frappe.website.utils import is_signup_disabled
@@ -33,6 +33,18 @@ def sign_up(full_name: str, email: str, password: str) -> None:
 	user.flags.ignore_permissions = True
 	user.insert()
 	frappe.local.login_manager.login_as(user.name)
+
+
+@frappe.whitelist(methods=["POST"])
+@rate_limit(limit=10, seconds=10 * 60)
+def change_password(old_password: str, new_password: str) -> None:
+	# frappe clears the session cookies on an AuthenticationError, so a typo in the
+	# current password would log the host out of the page they are on
+	try:
+		frappe.local.login_manager.check_password(frappe.session.user, old_password)
+	except frappe.AuthenticationError:
+		frappe.throw(_("Current password is wrong."))
+	update_password(new_password, old_password=old_password)
 
 
 def signups_past_hour_exceeded() -> bool:

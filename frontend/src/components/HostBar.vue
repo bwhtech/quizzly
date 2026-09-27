@@ -15,9 +15,18 @@
 		</nav>
 		<span class="ml-auto flex items-center gap-4">
 			<ThemeButton class="ctl" />
-			<span class="hidden truncate font-mono text-xs text-paper/40 sm:inline">{{
-				user
-			}}</span>
+			<RouterLink
+				class="ctl gap-2"
+				:data-on="isProfile"
+				to="/host/profile"
+				aria-label="Profile"
+				title="Profile"
+			>
+				<LucideUser class="size-4" />
+				<span class="hidden max-w-48 truncate font-mono text-xs sm:inline">{{
+					user
+				}}</span>
+			</RouterLink>
 			<button class="font-mono text-xs text-paper/40 hover:text-paper" @click="logout">
 				Logout
 			</button>
@@ -38,6 +47,7 @@ const user = window.session_user;
 
 const isHosting = computed(() => route.path === "/host");
 const isAuthoring = computed(() => route.path.startsWith("/host/quizzes"));
+const isProfile = computed(() => route.path === "/host/profile");
 
 async function logout() {
 	await call("logout");

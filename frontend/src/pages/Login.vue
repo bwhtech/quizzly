@@ -80,6 +80,7 @@
 					</span>
 					<PasswordInput
 						id="password"
+						class="w-full rounded-2xl border border-haze bg-dusk px-4 py-3.5 text-lg font-medium text-paper placeholder:text-paper/25 focus:border-ember focus:ring-0"
 						v-model="password"
 						:autocomplete="isSignUp ? 'new-password' : 'current-password'"
 						required
@@ -94,6 +95,7 @@
 					</label>
 					<PasswordInput
 						id="confirm-password"
+						class="w-full rounded-2xl border border-haze bg-dusk px-4 py-3.5 text-lg font-medium text-paper placeholder:text-paper/25 focus:border-ember focus:ring-0"
 						v-model="confirmPassword"
 						autocomplete="new-password"
 						required
