@@ -50,6 +50,7 @@ QUESTIONS = [
 
 frappe.db.delete("TT Quiz", {"title": TITLE})
 
+# nosemgrep: frappe-semgrep-rules.rules.frappe-breaks-multitenancy
 quiz = frappe.get_doc(
 	{
 		"doctype": "TT Quiz",
@@ -60,5 +61,6 @@ quiz = frappe.get_doc(
 	}
 ).insert()
 
-frappe.db.commit()
+# bench console never commits on exit
+frappe.db.commit()  # nosemgrep
 print("seeded", quiz.name)

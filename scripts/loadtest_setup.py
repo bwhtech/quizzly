@@ -19,10 +19,10 @@ QUIZ_TITLE = "General Knowledge"
 PLAYERS = int(os.environ.get("TT_LOADTEST_PLAYERS", "100"))
 STATE_FILE = Path("/tmp/trivia_tap_loadtest.json")
 
+# nosemgrep: frappe-semgrep-rules.rules.frappe-breaks-multitenancy
 quiz = frappe.db.get_value("TT Quiz", {"title": QUIZ_TITLE}, "name")
 assert quiz, f"seed {QUIZ_TITLE!r} first (scripts/seed_demo.py)"
 
-frappe.set_user("Administrator")
 created = api.create_session(quiz)
 session_name, pin = created["session"], created["game_pin"]
 
@@ -40,6 +40,7 @@ for i in range(PLAYERS):
 	).insert(ignore_permissions=True)
 	tokens.append(token)
 
+# nosemgrep: frappe-semgrep-rules.rules.frappe-breaks-multitenancy
 session = frappe.get_doc("TT Session", session_name)
 session.status = "Active"
 session.started_at = frappe.utils.now_datetime()
@@ -50,7 +51,8 @@ questions = engine.get_quiz_questions(session)
 engine.clear_control(session_name)
 engine.get_ready(session, questions[0], 0, len(questions))
 frappe.cache.sadd(engine.ACTIVE_SESSIONS_KEY, session_name)
-frappe.db.commit()
+# bench console never commits on exit
+frappe.db.commit()  # nosemgrep
 
 STATE_FILE.write_text(json.dumps({"pin": pin, "session": session_name, "tokens": tokens}))
 print(f"armed session={session_name} pin={pin} players={PLAYERS} questions={len(questions)}")

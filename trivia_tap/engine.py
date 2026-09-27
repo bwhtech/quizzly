@@ -282,7 +282,8 @@ def close_question(session_doc, question, index: int, total: int) -> None:
 		show_explanation(session_doc, state, explanation, closed=closed)
 	else:
 		show_stats(session_doc, state, closed, explanation_after=explanation)
-	frappe.db.commit()
+	# the stats event is sent after commit, so this is what puts the scores on screen
+	frappe.db.commit()  # nosemgrep
 
 
 def show_explanation(session_doc, state: dict, explanation: dict, closed: dict | None = None) -> None:
@@ -460,7 +461,8 @@ def finish_session(session_doc) -> None:
 	)
 	clear_state(session_doc.name)
 	frappe.cache.srem(ACTIVE_SESSIONS_KEY, session_doc.name)
-	frappe.db.commit()
+	# also reached from GET requests reaping abandoned games, which Frappe never commits
+	frappe.db.commit()  # nosemgrep
 
 
 def compute_points(response_ms: int, window_ms: int, streak: int, multiplier: int) -> int:

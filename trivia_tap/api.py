@@ -214,6 +214,8 @@ def join_session(pin: str, nickname: str, avatar: str | None = None) -> dict:
 	}
 
 
+# Guests play by design; rate-limited and gated by the participant token.
+# nosemgrep: frappe-semgrep-rules.rules.security.guest-whitelisted-method
 @frappe.whitelist(allow_guest=True, methods=["POST"])
 @rate_limit(key="token", limit=30, seconds=60)
 def submit_answer(pin: str, token: str, question_row: str, selected_option: str) -> dict:
@@ -294,6 +296,8 @@ def get_state(pin: str, token: str) -> dict:
 	return result
 
 
+# Guests play by design; rate-limited and gated by the participant token.
+# nosemgrep: frappe-semgrep-rules.rules.security.guest-whitelisted-method
 @frappe.whitelist(allow_guest=True)
 @rate_limit(key="token", limit=60, seconds=60)
 def get_result(pin: str, token: str, question_row: str) -> dict:
@@ -318,6 +322,8 @@ def get_result(pin: str, token: str, question_row: str) -> dict:
 	}
 
 
+# Guests play by design; rate-limited and gated by the participant token.
+# nosemgrep: frappe-semgrep-rules.rules.security.guest-whitelisted-method
 @frappe.whitelist(allow_guest=True, methods=["POST"])
 @rate_limit(limit=10, seconds=60)
 def leave_session(pin: str, token: str) -> None:
