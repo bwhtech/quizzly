@@ -1,5 +1,17 @@
 # Progress
 
+## Fix: a host sees only their own games (2026-09-28)
+
+Spec: `specs/fix-host-data-scope.md`.
+
+- Any Quiz Host could list every player (nickname, avatar, score, token hash)
+  and every answer from every host's games through desk or `frappe.client`.
+  Quizzes and sessions were already private.
+- `trivia_tap/permissions.py` scopes `TT Participant` and `TT Answer` to the host
+  of their session, through `permission_query_conditions` and `has_permission`.
+- Verified with two hosts over the live site and in
+  `tests/test_permissions.py`, which fails without the hooks. 71 tests pass.
+
 ## Phase 13: Rename to TriviaTap (2026-09-27)
 
 Spec: `specs/phase-13-rename-trivia-tap.md`. Quizzly is now TriviaTap, down to
