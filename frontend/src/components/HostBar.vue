@@ -7,7 +7,7 @@
 			to="/host"
 			aria-label="TriviaTap"
 		>
-			<img alt="" class="size-7 rounded-md" :src="logoUrl" />
+			<img alt="" class="size-7 rounded-md" :src="LOGO_URL" />
 			<span class="hidden sm:inline">TriviaTap</span>
 		</RouterLink>
 		<nav class="flex items-center gap-2">
@@ -33,8 +33,7 @@ import { computed } from "vue";
 import { useRoute } from "vue-router";
 import { firstName } from "@/host";
 import ThemeButton from "@/components/ThemeButton.vue";
-
-const logoUrl = "/assets/trivia_tap/images/trivia-tap-logo.png";
+import { LOGO_URL } from "@/theme";
 
 const route = useRoute();
 

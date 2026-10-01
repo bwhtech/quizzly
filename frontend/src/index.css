@@ -1,43 +1,45 @@
 @import 'frappe-ui/style.css';
 
-/* Night sky, the default. Channels so Tailwind's opacity modifiers still work. */
+/* Logo ink, the default. Channels so Tailwind's opacity modifiers still work. */
 :root {
 	color-scheme: dark;
-	--night: 22 17 31;
-	--dusk: 36 28 49;
-	--haze: 58 47 77;
-	--paper: 244 240 250;
+	/* The logo's own gradient: every primary action wears it. */
+	--brand: linear-gradient(135deg, #6bf57f, #11ddb9);
+	--night: 13 19 17;
+	--dusk: 23 33 29;
+	--haze: 42 58 51;
+	--paper: 238 248 243;
 	--alert: 255 90 54;
-	--accent: 255 196 61;
+	--accent: 32 238 160;
 	--ok: 23 176 190;
 }
 
 /* Daylight. The accent trio is re-derived rather than inverted: on a light
-   ground each one has to drop far enough to read as small text against `paper`.
+   ground each one has to drop far enough to read as small text against `night`.
    The answer tiles are not in here at all — they keep their brand hues.
 
    A host in a bright room is not the same thing as a host whose laptop is set
    to light, so the toggle overrides the OS in both directions. */
 :root[data-theme='light'] {
 	color-scheme: light;
-	--night: 251 249 253;
-	--dusk: 240 235 247;
-	--haze: 214 205 228;
-	--paper: 27 21 38;
+	--night: 246 251 248;
+	--dusk: 232 244 238;
+	--haze: 199 222 211;
+	--paper: 13 19 17;
 	--alert: 214 54 15;
-	--accent: 148 102 0;
+	--accent: 10 122 82;
 	--ok: 10 122 133;
 }
 
 @media (prefers-color-scheme: light) {
 	:root:not([data-theme='dark']) {
 		color-scheme: light;
-		--night: 251 249 253;
-		--dusk: 240 235 247;
-		--haze: 214 205 228;
-		--paper: 27 21 38;
+		--night: 246 251 248;
+		--dusk: 232 244 238;
+		--haze: 199 222 211;
+		--paper: 13 19 17;
 		--alert: 214 54 15;
-		--accent: 148 102 0;
+		--accent: 10 122 82;
 		--ok: 10 122 133;
 	}
 }
@@ -49,7 +51,7 @@ body {
 	font-family: 'Instrument Sans', system-ui, sans-serif;
 }
 
-/* Everything sits on the same ground, so one accent ring works everywhere. */
+/* Everything sits on the same ground, so one mint ring works everywhere. */
 :where(button, a, input, [tabindex]):focus-visible {
 	outline: 3px solid rgb(var(--accent));
 	outline-offset: 3px;
@@ -118,16 +120,16 @@ body {
 }
 
 .ctl-go {
-	background: #ff5a36;
-	border-color: #ff5a36;
-	color: #16111f;
+	background: var(--brand);
+	border-color: transparent;
+	color: #0a100e;
 	font-weight: 800;
 }
 
 .ctl-go:hover:not(:disabled) {
-	border-color: #ff5a36;
-	color: #16111f;
-	filter: brightness(1.1);
+	border-color: transparent;
+	color: #0a100e;
+	filter: brightness(1.08);
 }
 
 .ctl:disabled {
@@ -137,7 +139,7 @@ body {
 .ctl-danger {
 	background: #ff5a36;
 	border-color: #ff5a36;
-	color: #16111f;
+	color: #0a100e;
 	font-weight: 800;
 }
 

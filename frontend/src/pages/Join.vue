@@ -7,12 +7,17 @@
 			<p
 				class="mb-3 flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.28em] text-accent"
 			>
-				<svg class="h-3 w-3 fill-gold" viewBox="0 0 24 24">
+				<svg class="h-3 w-3 fill-accent" viewBox="0 0 24 24">
 					<path :d="SHAPES[1].path" />
 				</svg>
 				Live quiz
 			</p>
-			<h1 class="font-display text-6xl font-extrabold leading-none text-paper">TriviaTap</h1>
+			<h1
+				class="flex items-center gap-3 font-display text-6xl font-extrabold leading-none text-paper"
+			>
+				<img alt="" class="size-14 rounded-2xl" :src="LOGO_URL" />
+				TriviaTap
+			</h1>
 			<p class="mt-3 text-paper/50">
 				Type the PIN on the big screen, pick a face, and you're in.
 			</p>
@@ -24,7 +29,7 @@
 					</span>
 					<input
 						v-model="pin"
-						class="w-full rounded-2xl border border-haze bg-dusk py-4 text-center font-mono text-4xl font-bold tracking-[0.18em] text-paper placeholder:text-paper/20 focus:border-ember focus:ring-0"
+						class="w-full rounded-2xl border border-haze bg-dusk py-4 text-center font-mono text-4xl font-bold tracking-[0.18em] text-paper placeholder:text-paper/20 focus:border-accent focus:ring-0"
 						placeholder="000000"
 						inputmode="numeric"
 						maxlength="6"
@@ -38,7 +43,7 @@
 					</span>
 					<input
 						v-model="nickname"
-						class="w-full rounded-2xl border border-haze bg-dusk px-4 py-3.5 text-lg font-medium text-paper placeholder:text-paper/25 focus:border-ember focus:ring-0"
+						class="w-full rounded-2xl border border-haze bg-dusk px-4 py-3.5 text-lg font-medium text-paper placeholder:text-paper/25 focus:border-accent focus:ring-0"
 						placeholder="Your name"
 						maxlength="20"
 						autocomplete="off"
@@ -48,7 +53,7 @@
 							v-for="suggestion in suggestions"
 							:key="suggestion"
 							type="button"
-							class="rounded-full border border-haze px-3 py-1 text-sm text-paper/70 transition hover:border-lagoon hover:text-ok"
+							class="rounded-full border border-haze px-3 py-1 text-sm text-paper/70 transition hover:border-accent hover:text-accent"
 							@click="nickname = suggestion"
 						>
 							{{ suggestion }}
@@ -91,7 +96,7 @@
 									class="block rounded-full p-0.5 transition duration-200"
 									:class="
 										avatar === option.id
-											? 'bg-gold ring-2 ring-gold'
+											? 'bg-mint ring-2 ring-mint'
 											: 'scale-[0.62] opacity-55 hover:opacity-100'
 									"
 								>
@@ -104,7 +109,7 @@
 
 				<button
 					type="submit"
-					class="rounded-2xl bg-ember py-4 font-display text-xl font-extrabold text-sunk transition hover:brightness-110 disabled:opacity-50"
+					class="rounded-2xl bg-brand py-4 font-display text-xl font-extrabold text-sunk transition hover:brightness-110 disabled:opacity-50"
 					:disabled="joining"
 				>
 					{{ joining ? "Joining…" : "Join game" }}
@@ -134,6 +139,7 @@ import { suggestNicknames } from "@/nicknames";
 import { SHAPES } from "@/game";
 import AvatarPic from "@/components/AvatarPic.vue";
 import ThemeButton from "@/components/ThemeButton.vue";
+import { LOGO_URL } from "@/theme";
 
 const route = useRoute();
 const router = useRouter();

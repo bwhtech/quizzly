@@ -7,12 +7,17 @@
 			<p
 				class="mb-3 flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.28em] text-accent"
 			>
-				<svg class="h-3 w-3 fill-gold" viewBox="0 0 24 24">
+				<svg class="h-3 w-3 fill-accent" viewBox="0 0 24 24">
 					<path :d="SHAPES[1].path" />
 				</svg>
 				Host
 			</p>
-			<h1 class="font-display text-6xl font-extrabold leading-none text-paper">TriviaTap</h1>
+			<h1
+				class="flex items-center gap-3 font-display text-6xl font-extrabold leading-none text-paper"
+			>
+				<img alt="" class="size-14 rounded-2xl" :src="LOGO_URL" />
+				TriviaTap
+			</h1>
 			<p class="mt-3 text-paper/50">
 				{{
 					isSignUp
@@ -43,7 +48,7 @@
 					>
 					<input
 						v-model="fullName"
-						class="w-full rounded-2xl border border-haze bg-dusk px-4 py-3.5 text-lg font-medium text-paper placeholder:text-paper/25 focus:border-ember focus:ring-0"
+						class="w-full rounded-2xl border border-haze bg-dusk px-4 py-3.5 text-lg font-medium text-paper placeholder:text-paper/25 focus:border-accent focus:ring-0"
 						autocomplete="name"
 						placeholder="Ada Lovelace"
 						required
@@ -55,7 +60,7 @@
 					>
 					<input
 						v-model="email"
-						class="w-full rounded-2xl border border-haze bg-dusk px-4 py-3.5 text-lg font-medium text-paper placeholder:text-paper/25 focus:border-ember focus:ring-0"
+						class="w-full rounded-2xl border border-haze bg-dusk px-4 py-3.5 text-lg font-medium text-paper placeholder:text-paper/25 focus:border-accent focus:ring-0"
 						type="email"
 						autocomplete="email"
 						placeholder="you@school.org"
@@ -80,7 +85,7 @@
 					</span>
 					<PasswordInput
 						id="password"
-						class="w-full rounded-2xl border border-haze bg-dusk px-4 py-3.5 text-lg font-medium text-paper placeholder:text-paper/25 focus:border-ember focus:ring-0"
+						class="w-full rounded-2xl border border-haze bg-dusk px-4 py-3.5 text-lg font-medium text-paper placeholder:text-paper/25 focus:border-accent focus:ring-0"
 						v-model="password"
 						:autocomplete="isSignUp ? 'new-password' : 'current-password'"
 						required
@@ -95,7 +100,7 @@
 					</label>
 					<PasswordInput
 						id="confirm-password"
-						class="w-full rounded-2xl border border-haze bg-dusk px-4 py-3.5 text-lg font-medium text-paper placeholder:text-paper/25 focus:border-ember focus:ring-0"
+						class="w-full rounded-2xl border border-haze bg-dusk px-4 py-3.5 text-lg font-medium text-paper placeholder:text-paper/25 focus:border-accent focus:ring-0"
 						v-model="confirmPassword"
 						autocomplete="new-password"
 						required
@@ -104,7 +109,7 @@
 
 				<button
 					type="submit"
-					class="mt-1 rounded-2xl bg-ember py-4 font-display text-xl font-extrabold text-sunk transition hover:brightness-110 disabled:opacity-50"
+					class="mt-1 rounded-2xl bg-brand py-4 font-display text-xl font-extrabold text-sunk transition hover:brightness-110 disabled:opacity-50"
 					:disabled="busy"
 				>
 					{{ busy ? "One moment…" : isSignUp ? "Create account" : "Log in" }}
@@ -129,6 +134,7 @@ import { call, errorText } from "@/api";
 import { SHAPES } from "@/game";
 import PasswordInput from "@/components/PasswordInput.vue";
 import ThemeButton from "@/components/ThemeButton.vue";
+import { LOGO_URL } from "@/theme";
 
 const TABS = [
 	{ mode: "login", label: "Log in" },
