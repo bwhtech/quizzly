@@ -88,7 +88,7 @@
 				</h1>
 				<p class="text-paper/50">You can join again with the PIN.</p>
 				<button
-					class="rounded-2xl bg-ember px-7 py-3 font-display text-lg font-extrabold text-sunk"
+					class="rounded-2xl bg-brand px-7 py-3 font-display text-lg font-extrabold text-sunk"
 					@click="router.replace('/join')"
 				>
 					Back to join

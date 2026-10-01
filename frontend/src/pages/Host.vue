@@ -27,7 +27,7 @@
 					<button
 						v-for="(quiz, index) in quizzes"
 						:key="quiz.name"
-						class="group flex items-center gap-4 rounded-2xl border border-haze bg-dusk px-5 py-4 text-left transition hover:border-ember"
+						class="group flex items-center gap-4 rounded-2xl border border-haze bg-dusk px-5 py-4 text-left transition hover:border-accent"
 						@click="createSession(quiz.name)"
 					>
 						<span class="font-mono text-xs tabular-nums text-paper/35">
@@ -97,7 +97,7 @@
 						<img
 							:src="qrDataUrl"
 							alt="Join QR code"
-							class="size-40 rounded-2xl bg-card p-2 transition group-hover:scale-105 sm:size-48"
+							class="size-40 rounded-2xl bg-card p-2 ring-1 ring-haze transition group-hover:scale-105 sm:size-48"
 						/>
 						<span
 							class="mt-2 block font-mono text-[11px] uppercase tracking-wider text-paper/35 transition group-hover:text-paper/70"
@@ -515,6 +515,7 @@ import ThemeButton from "@/components/ThemeButton.vue";
 import DrainRing from "@/components/DrainRing.vue";
 import HostBar from "@/components/HostBar.vue";
 import { initSound, muted, playCue, toggleMute } from "@/sound";
+import { LOGO_URL } from "@/theme";
 
 const PODIUM_FILL = { 1: "bg-gold", 2: "bg-lagoon", 3: "bg-orchid" };
 // remembered so a reload on the podium restores it: get_host_state only auto-finds live sessions
@@ -715,10 +716,10 @@ async function renderQr(url) {
 		margin: 1,
 		width: 800,
 		errorCorrectionLevel: "H",
-		color: { dark: "#16111F", light: "#F4F0FA" },
+		color: { dark: "#0A100E", light: "#F2FBF6" },
 	});
 	const logo = new Image();
-	logo.src = "/assets/trivia_tap/images/trivia-tap-logo.png";
+	logo.src = LOGO_URL;
 	try {
 		await logo.decode();
 	} catch {
@@ -728,7 +729,7 @@ async function renderQr(url) {
 	const at = Math.round((canvas.width - badge) / 2);
 	const pad = Math.round(badge * 0.12);
 	const context = canvas.getContext("2d");
-	context.fillStyle = "#F4F0FA";
+	context.fillStyle = "#F2FBF6";
 	context.fillRect(at - pad, at - pad, badge + pad * 2, badge + pad * 2);
 	context.drawImage(logo, at, at, badge, badge);
 	return canvas.toDataURL();

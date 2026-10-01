@@ -28,8 +28,13 @@ export default {
 				lagoon: "#17B0BE",
 				gold: "#FFC43D",
 				orchid: "#9B6BFF",
-				sunk: "#16111F",
-				card: "#F4F0FA",
+				// The logo: mint fill, ink line, white face.
+				mint: "#20EEA0",
+				sunk: "#0A100E",
+				card: "#F2FBF6",
+			},
+			backgroundImage: {
+				brand: "var(--brand)",
 			},
 			fontFamily: {
 				display: ['"Bricolage Grotesque"', "system-ui", "sans-serif"],

@@ -1,5 +1,34 @@
 # Progress
 
+## Phase 16: Brand theme from the logo (2026-10-01)
+
+Spec: `specs/phase-16-brand-theme.md`.
+
+### Done
+
+- Ground moved from purple night to the logo's green-tinted ink, in both themes.
+- `accent` is mint (`#20EEA0` dark, `#0A7A52` light, 5.1:1 on the light ground).
+- Primary actions (Join game, Log in, Back to join, `.ctl-go`) wear the logo
+  gradient through one `--brand` variable, exposed to Tailwind as `bg-brand`.
+  Ember keeps answer 1, urgency and danger.
+- `sunk`, `card`, QR colours and `theme-color` follow the logo ink and white.
+- Join and Log in show the logo beside the wordmark. `LOGO_URL` lives in
+  `theme.js` and replaces three copies of the path.
+- The lobby QR card gets a `haze` ring: in light mode it melted into the ground.
+
+### Verified
+
+`yarn build` and pre-commit pass. In the browser: join (desktop and phone),
+log in, host quiz picker, quiz list, lobby with a player, read-time screen, in
+both themes.
+
+### Notes
+
+- The running `bench worker` predates today's frappe pull and fails every
+  `tt_ticker` run with `ImportError: defer_enqueue_after_commit`. Games freeze at
+  read time until `bench start` restarts. Reveal and podium screens were not
+  re-checked for that reason.
+
 ## Phase 15: Host profile (2026-09-28)
 
 Spec: `specs/phase-15-host-profile.md`.
